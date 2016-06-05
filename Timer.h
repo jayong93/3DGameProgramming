@@ -11,6 +11,7 @@ public:
 	void Tick(float lockFPS = 0.0f);
 	ULONG GetFrameRate(LPTSTR string = nullptr, int len = 0);
 	float GetTimeElapsed();
+	float GetAvgTimeElapsed();
 
 private:
 	using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
@@ -18,6 +19,7 @@ private:
 
 	float timeScale;
 	float timeElapsed;
+	float avgTimeElapsed;
 	TimePoint currentTime;
 	TimePoint lastTime;
 

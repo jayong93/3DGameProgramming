@@ -47,12 +47,13 @@ void CTimer::Tick(float lockFPS)
 		fpsTimeElapsed = 0.0f;
 	}
 
-	timeElapsed = 0.0f;
+	timeElapsed = elapsed;
+	avgTimeElapsed = 0.0f;
 	for (ULONG i = 0; i < sampleCount; ++i)
 	{
-		timeElapsed += frameTime[i];
+		avgTimeElapsed += frameTime[i];
 	}
-	if (sampleCount > 0) timeElapsed /= sampleCount;
+	if (sampleCount > 0) avgTimeElapsed /= sampleCount;
 }
 
 ULONG CTimer::GetFrameRate(LPTSTR str, int len)
@@ -69,4 +70,9 @@ ULONG CTimer::GetFrameRate(LPTSTR str, int len)
 float CTimer::GetTimeElapsed()
 {
 	return timeElapsed;
+}
+
+float CTimer::GetAvgTimeElapsed()
+{
+	return avgTimeElapsed;
 }
