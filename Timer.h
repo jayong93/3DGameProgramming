@@ -23,6 +23,7 @@ private:
 
 	float frameTime[MAX_SAMPLE_COUNT];
 	ULONG sampleCount;
+	int frameCurIdx;
 
 	ULONG currentFrameRate;
 	ULONG fps;

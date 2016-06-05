@@ -108,7 +108,7 @@ void CGameFramework::FrameAdvance()
 
 	float fClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
-	dxgiSwapChain->Present(1, 0);
+	dxgiSwapChain->Present(0, 0);
 
 	timer.GetFrameRate(captionBuffer + 16, 32);
 	SetWindowText(hWnd, captionBuffer);

@@ -2,7 +2,7 @@
 #include "Timer.h"
 
 
-CTimer::CTimer() : lastTime{ Clock::now() }, sampleCount{ 0 }, currentFrameRate{ 0 }, fps{ 0 }, fpsTimeElapsed{ 0.0f }, timeScale{ 0.001f }
+CTimer::CTimer() : lastTime{ Clock::now() }, sampleCount{ 0 }, currentFrameRate{ 0 }, fps{ 0 }, fpsTimeElapsed{ 0.0f }, timeScale{ 0.001f }, frameCurIdx{ 0 }
 {
 }
 
@@ -33,8 +33,8 @@ void CTimer::Tick(float lockFPS)
 
 	if (fabsf(elapsed - timeElapsed) < 1.0f)
 	{
-		memmove_s(frameTime+1, sizeof(float)*(MAX_SAMPLE_COUNT - 1), frameTime, sizeof(float)*(MAX_SAMPLE_COUNT - 1));
-		frameTime[0] = elapsed;
+		frameTime[frameCurIdx++] = elapsed;
+		frameCurIdx = frameCurIdx % MAX_SAMPLE_COUNT;
 		if (sampleCount < MAX_SAMPLE_COUNT) sampleCount++;
 	}
 
@@ -62,7 +62,7 @@ ULONG CTimer::GetFrameRate(LPTSTR str, int len)
 		_itow_s(currentFrameRate, str, len, 10);
 		wcscat_s(str, len, TEXT(" FPS"));
 	}
-	
+
 	return currentFrameRate;
 }
 
