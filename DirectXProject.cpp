@@ -108,8 +108,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 	RECT crt{ 0,0,640,480 };
-	AdjustWindowRect(&crt, WS_OVERLAPPED, false);
-	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+	AdjustWindowRect(&crt, WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX, false);
+	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT, crt.right-crt.left, crt.bottom-crt.top, nullptr, nullptr, hInstance, nullptr);
 
 	gameFramework.OnCreate(hInst, hWnd);

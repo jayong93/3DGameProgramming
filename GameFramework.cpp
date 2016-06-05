@@ -4,6 +4,7 @@
 
 CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }
 {
+	_tcscpy_s(captionBuffer, TEXT("DirectX Project "));
 }
 
 
@@ -101,12 +102,16 @@ void CGameFramework::AnimateObject()
 
 void CGameFramework::FrameAdvance()
 {
+	timer.Tick();
 	ProcessInput();
 	AnimateObject();
 
 	float fClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
 	dxgiSwapChain->Present(1, 0);
+
+	timer.GetFrameRate(captionBuffer + 16, 32);
+	SetWindowText(hWnd, captionBuffer);
 }
 
 void CGameFramework::OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
@@ -158,7 +163,7 @@ LRESULT CGameFramework::OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LP
 
 		if (d3dRenderTargetView) d3dRenderTargetView->Release();
 
-		dxgiSwapChain->ResizeBuffers(2, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+		dxgiSwapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
 		CreateRenderTargetView();
 

@@ -1,4 +1,6 @@
 #pragma once
+#include "Timer.h"
+
 class CGameFramework
 {
 public:
@@ -32,5 +34,8 @@ private:
 	IDXGISwapChain* dxgiSwapChain;
 	ID3D11DeviceContext* d3dDeviceContext;
 	ID3D11RenderTargetView* d3dRenderTargetView;
+
+	CTimer timer;
+	TCHAR captionBuffer[50];
 };
 
