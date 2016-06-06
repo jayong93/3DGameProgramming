@@ -20,6 +20,8 @@ public:
 	CDiffusedVertex() : position{ 0,0,0 }, diffuse{ 0,0,0,0 } {}
 	~CDiffusedVertex() {}
 
+	const D3DXVECTOR3& GetPosition() const { return position; }
+
 private:
 	D3DXVECTOR3 position;
 	D3DXCOLOR diffuse;
@@ -34,9 +36,12 @@ public:
 	void Release();
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 	virtual void CreateRasterizerState(ID3D11Device* device);
+	UINT GetVertexCount() const { return vertexCnt; }
+	const CDiffusedVertex& GetVertexData(int index) const { return vertexList[index]; }
 
 protected:
 	ID3D11Buffer* vertexBuffer;
+	CDiffusedVertex* vertexList{ nullptr };
 	UINT vertexCnt;
 	UINT strideByte;
 	UINT offset;
@@ -79,4 +84,5 @@ public:
 
 	virtual void CreateRasterizerState(ID3D11Device* device);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
+
 };

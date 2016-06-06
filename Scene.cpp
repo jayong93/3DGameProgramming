@@ -67,6 +67,44 @@ void CScene::AnimateObject(float elapsedTime)
 	{
 		o->Animate(elapsedTime);
 	}
+
+	// 충돌 처리
+	CGameObject* outerCube{ objectList.front() };
+	D3DXPLANE plane[6];
+	CMesh* mesh = outerCube->mesh;
+	for (int i = 0, j = 0; j < 6 && i < mesh->GetVertexCount(); i += 6, ++j)
+	{
+		D3DXPlaneFromPoints(plane + j, &mesh->GetVertexData(i).GetPosition(), &mesh->GetVertexData(i + 1).GetPosition(), &mesh->GetVertexData(i + 2).GetPosition());
+		D3DXPlaneNormalize(plane + j, plane + j);
+	}
+	for (auto it = objectList.begin() + 1; it != objectList.end(); ++it)
+	{
+		bool needReflection{ false };
+		D3DXVECTOR3 planeNormal;
+		auto pos = (*it)->GetPos();
+		const CMesh& m = *(*it)->mesh;
+		for (int i = 0; i < m.GetVertexCount() && !needReflection; ++i)
+		{
+			for (int j = 0; j < 6; ++j)
+			{
+				if (D3DXPlaneDotCoord(plane + j, &(m.GetVertexData(i).GetPosition() + pos)) > 0)
+				{
+					needReflection = true;
+					memcpy_s(&planeNormal, sizeof(float) * 3, plane + j, sizeof(float) * 3);
+					break;
+				}
+			}
+		}
+
+		if (needReflection)
+		{
+			CRotatingObject& rObj = *(CRotatingObject*)(*it);
+			auto vel = rObj.GetVelocity();
+			vel -= (vel - planeNormal) * 2;
+			vel *= -1.0f;
+			rObj.SetVelocity(vel.x, vel.y, vel.z);
+		}
+	}
 }
 
 void CScene::Render(ID3D11DeviceContext * deviceContext, CCamera* camera)

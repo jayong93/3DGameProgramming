@@ -181,10 +181,10 @@ void CGameFramework::AnimateObject()
 
 void CGameFramework::FrameAdvance()
 {
-	timer.Tick(0);
+	timer.Tick();
 	ProcessInput();
 	AnimateObject();
-
+	
 	float fClearColor[4] = { 0.75f, 0.75f, 1.0f, 1.0f };
 	if (d3dRenderTargetView)
 		d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
