@@ -24,6 +24,9 @@ public:
 	void CreateShaderVariable(ID3D11Device* device);
 	void UpdateShaderVariable(ID3D11DeviceContext* deviceContext);
 
+	const D3DXMATRIX& GetViewMatrix() const { return mtxView; }
+	const D3DXMATRIX& GetProjectionMatrix() const { return mtxProjection; }
+	const D3D11_VIEWPORT& GetViewport() const { return viewport; }
 protected:
 	D3DXMATRIX mtxView;
 	D3DXMATRIX mtxProjection;

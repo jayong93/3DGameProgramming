@@ -143,19 +143,6 @@ void CGameFramework::BuildObject()
 	player->CreateShaderVariables(d3dDevice);
 
 	if (scene) scene->BuildObject(d3dDevice);
-
-	D3DXCOLOR color{ 1.0f,0.0f,0.0f,1.0f };
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = sizeof(D3DXCOLOR);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	D3D11_SUBRESOURCE_DATA data;
-	ZeroMemory(&data, sizeof(data));
-	data.pSysMem = &color;
-	d3dDevice->CreateBuffer(&bd, &data, &cbColor);
-	d3dDeviceContext->PSSetConstantBuffers(PS_SLOT_COLOR, 1, &cbColor);
 }
 
 void CGameFramework::ReleaseObject()
@@ -184,7 +171,7 @@ void CGameFramework::FrameAdvance()
 	timer.Tick();
 	ProcessInput();
 	AnimateObject();
-	
+
 	float fClearColor[4] = { 0.75f, 0.75f, 1.0f, 1.0f };
 	if (d3dRenderTargetView)
 		d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
@@ -208,7 +195,11 @@ void CGameFramework::OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARA
 	{
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+	{
+		// ÇÇÅ·
+		
 		break;
+	}
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 		break;

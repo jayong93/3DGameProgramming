@@ -42,6 +42,12 @@ void CGameObject::Render(ID3D11DeviceContext * deviceContext)
 	if (mesh) mesh->Render(deviceContext);
 }
 
+bool CGameObject::RayCast(const D3DXVECTOR3 & ray) const
+{
+
+	return false;
+}
+
 CRotatingObject::CRotatingObject(float yAngle) : CGameObject(), yAnglePerSecond{ yAngle }
 {
 }

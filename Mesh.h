@@ -51,7 +51,6 @@ protected:
 
 private:
 	int reference;
-
 };
 
 class CTriangleMesh : public CMesh
@@ -72,8 +71,6 @@ public:
 
 	virtual void CreateRasterizerState(ID3D11Device* device);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
-private:
-
 };
 
 class CWireCubeMesh : public CMesh
@@ -84,5 +81,4 @@ public:
 
 	virtual void CreateRasterizerState(ID3D11Device* device);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
-
 };

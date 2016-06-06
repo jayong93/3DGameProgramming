@@ -25,6 +25,7 @@ void CScene::BuildObject(ID3D11Device * device)
 	CShader* shader{ new CShader };
 	shader->CreateShader(device);
 
+	// 외곽 큐브
 	CWireCubeMesh* wMesh{ new CWireCubeMesh{device, 45.0f, 45.0f, 45.0f} };
 	CGameObject* obj{ new CGameObject };
 	obj->SetMesh(wMesh);
@@ -32,6 +33,7 @@ void CScene::BuildObject(ID3D11Device * device)
 
 	objectList.emplace_back(obj);
 
+	// 내부 큐브들
 	CCubeMesh* cMesh{ new CCubeMesh{device} };
 	CRotatingObject* rObj;
 	for (int i = 0; i < 50; i++)
@@ -72,11 +74,13 @@ void CScene::AnimateObject(float elapsedTime)
 	CGameObject* outerCube{ objectList.front() };
 	D3DXPLANE plane[6];
 	CMesh* mesh = outerCube->mesh;
+	// 외곽 큐브 평면 구하기
 	for (int i = 0, j = 0; j < 6 && i < mesh->GetVertexCount(); i += 6, ++j)
 	{
 		D3DXPlaneFromPoints(plane + j, &mesh->GetVertexData(i).GetPosition(), &mesh->GetVertexData(i + 1).GetPosition(), &mesh->GetVertexData(i + 2).GetPosition());
 		D3DXPlaneNormalize(plane + j, plane + j);
 	}
+	// 충돌체크 및 반사
 	for (auto it = objectList.begin() + 1; it != objectList.end(); ++it)
 	{
 		bool needReflection{ false };
