@@ -27,7 +27,7 @@ void CScene::BuildObject(ID3D11Device * device)
 	shader->CreateShader(device);
 
 	CTriangleMesh* mesh{ new CTriangleMesh{device} };
-	CTriangleObject* obj{ new CTriangleObject };
+	CRotatingObject* obj{ new CRotatingObject };
 	obj->SetMesh(mesh);
 	obj->SetShader(shader);
 
@@ -49,9 +49,13 @@ bool CScene::ProcessInput()
 
 void CScene::AnimateObject(float elapsedTime)
 {
+	for (auto& o : objectList)
+	{
+		o->Animate(elapsedTime);
+	}
 }
 
-void CScene::Render(ID3D11DeviceContext * deviceContext)
+void CScene::Render(ID3D11DeviceContext * deviceContext, CCamera* camera)
 {
 	for (auto& o : objectList)
 		o->Render(deviceContext);

@@ -2,7 +2,7 @@
 #include "Mesh.h"
 
 
-CMesh::CMesh() : strideByte{ sizeof(CVertex) }, offset{ 0 }, reference{ 0 }, primitiveTopology{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST }
+CMesh::CMesh() : strideByte{ sizeof(CVertex) }, offset{ 0 }, reference{ 0 }, primitiveTopology{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST }, rasterizserState{ nullptr }
 {
 }
 
@@ -10,6 +10,7 @@ CMesh::CMesh() : strideByte{ sizeof(CVertex) }, offset{ 0 }, reference{ 0 }, pri
 CMesh::~CMesh()
 {
 	if (vertexBuffer) vertexBuffer->Release();
+	if (rasterizserState) rasterizserState->Release();
 }
 
 void CMesh::AddRef()
@@ -27,7 +28,12 @@ void CMesh::Render(ID3D11DeviceContext * deviceContext)
 {
 	if (vertexBuffer) deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &strideByte, &offset);
 	deviceContext->IASetPrimitiveTopology(primitiveTopology);
+	deviceContext->RSSetState(rasterizserState);
 	deviceContext->Draw(vertexCnt, offset);
+}
+
+void CMesh::CreateRasterizerState(ID3D11Device * device)
+{
 }
 
 CTriangleMesh::CTriangleMesh(ID3D11Device * device)
@@ -52,6 +58,8 @@ CTriangleMesh::CTriangleMesh(ID3D11Device * device)
 	strideByte = sizeof(CVertex);
 	offset = 0;
 	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CreateRasterizerState(device);
 }
 
 CTriangleMesh::~CTriangleMesh()
@@ -61,4 +69,13 @@ CTriangleMesh::~CTriangleMesh()
 void CTriangleMesh::Render(ID3D11DeviceContext * deviceContext)
 {
 	CMesh::Render(deviceContext);
+}
+
+void CTriangleMesh::CreateRasterizerState(ID3D11Device * device)
+{
+	D3D11_RASTERIZER_DESC rd;
+	ZeroMemory(&rd, sizeof(rd));
+	rd.CullMode = D3D11_CULL_NONE;
+	rd.FillMode = D3D11_FILL_SOLID;
+	device->CreateRasterizerState(&rd, &rasterizserState);
 }

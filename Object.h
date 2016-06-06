@@ -1,6 +1,7 @@
 #pragma once
 #include "Mesh.h"
 #include "Shader.h"
+#include "Camera.h"
 
 class CGameObject
 {
@@ -23,11 +24,11 @@ private:
 	int reference;
 };
 
-class CTriangleObject : public CGameObject
+class CRotatingObject : public CGameObject
 {
 public:
-	CTriangleObject();
-	virtual ~CTriangleObject();
+	CRotatingObject();
+	virtual ~CRotatingObject();
 
 	virtual void Animate(float deltaTime);
 	virtual void Render(ID3D11DeviceContext* deviceContext);

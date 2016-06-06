@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8078A834-76ED-4B44-BB03-711752D2E173}</ProjectGuid>
+    <ProjectGuid>{17A3A988-6864-4616-95FB-A7C8768999AD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DirectXProject</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>

@@ -18,6 +18,7 @@ public:
 	void AddRef();
 	void Release();
 	virtual void Render(ID3D11DeviceContext* deviceContext);
+	virtual void CreateRasterizerState(ID3D11Device* device);
 
 protected:
 	ID3D11Buffer* vertexBuffer;
@@ -26,6 +27,7 @@ protected:
 	UINT offset;
 
 	D3D11_PRIMITIVE_TOPOLOGY primitiveTopology;
+	ID3D11RasterizerState* rasterizserState;
 
 private:
 	int reference;
@@ -39,5 +41,6 @@ public:
 	virtual ~CTriangleMesh();
 
 	virtual void Render(ID3D11DeviceContext* deviceContext);
+	virtual void CreateRasterizerState(ID3D11Device* device);
 };
 

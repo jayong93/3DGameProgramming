@@ -34,24 +34,30 @@ void CGameObject::Animate(float deltaTime)
 
 void CGameObject::Render(ID3D11DeviceContext * deviceContext)
 {
-	if (shader) shader->Render(deviceContext);
+	if (shader)
+	{
+		shader->UpdateShaderVariable(deviceContext, &mtxWorld);
+		shader->Render(deviceContext);
+	}
 	if (mesh) mesh->Render(deviceContext);
 }
 
-CTriangleObject::CTriangleObject()
+CRotatingObject::CRotatingObject()
 {
 }
 
-CTriangleObject::~CTriangleObject()
+CRotatingObject::~CRotatingObject()
 {
 }
 
-void CTriangleObject::Animate(float deltaTime)
+void CRotatingObject::Animate(float deltaTime)
 {
-	CGameObject::Animate(deltaTime);
+	D3DXMATRIX rMatrix;
+	D3DXMatrixRotationY(&rMatrix, (float)D3DXToRadian(45.0f*deltaTime));
+	mtxWorld = rMatrix * mtxWorld;
 }
 
-void CTriangleObject::Render(ID3D11DeviceContext * deviceContext)
+void CRotatingObject::Render(ID3D11DeviceContext * deviceContext)
 {
 	CGameObject::Render(deviceContext);
 }

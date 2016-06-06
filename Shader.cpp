@@ -2,7 +2,7 @@
 #include "Shader.h"
 
 
-CShader::CShader() : vertexShader{ nullptr }, pixelShader{ nullptr }, vertexLayout{ nullptr }, reference{ 0 }
+CShader::CShader() : vertexShader{ nullptr }, pixelShader{ nullptr }, vertexLayout{ nullptr }, reference{ 0 }, cbMtxWorld{ nullptr }
 {
 }
 
@@ -12,6 +12,7 @@ CShader::~CShader()
 	if (vertexShader) vertexShader->Release();
 	if (pixelShader) pixelShader->Release();
 	if (vertexLayout) vertexLayout->Release();
+	ReleaseShaderVariables();
 }
 
 void CShader::CreateVertexShaderFromFile(ID3D11Device * device, TCHAR * fileName, LPCSTR shaderName, LPCSTR shaderModel, ID3D11VertexShader ** vertexShader, D3D11_INPUT_ELEMENT_DESC * inputLayout, UINT elementCnt, ID3D11InputLayout ** vertexLayout)
@@ -53,6 +54,7 @@ void CShader::CreateShader(ID3D11Device * device)
 	UINT elementCnt = ARRAYSIZE(inLayout);
 	CreateVertexShaderFromFile(device, TEXT("Effect.fx"), "VS", "vs_5_0", &vertexShader, inLayout, elementCnt, &vertexLayout);
 	CreatePixelShaderFromFile(device, TEXT("Effect.fx"), "PS", "ps_5_0", &pixelShader);
+	CreateShaderVariables(device);
 }
 
 void CShader::Render(ID3D11DeviceContext * deviceContext)
@@ -60,4 +62,31 @@ void CShader::Render(ID3D11DeviceContext * deviceContext)
 	if (vertexLayout) deviceContext->IASetInputLayout(vertexLayout);
 	if (vertexShader) deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	if (pixelShader) deviceContext->PSSetShader(pixelShader, nullptr, 0);
+}
+
+void CShader::CreateShaderVariables(ID3D11Device * device)
+{
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VS_CB_WORLD_MATRIX);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	device->CreateBuffer(&bd, nullptr, &cbMtxWorld);
+}
+
+void CShader::ReleaseShaderVariables()
+{
+	if (cbMtxWorld) cbMtxWorld->Release();
+}
+
+void CShader::UpdateShaderVariable(ID3D11DeviceContext * deviceContext, D3DXMATRIX * mWorld)
+{
+	D3D11_MAPPED_SUBRESOURCE mapRes;
+	deviceContext->Map(cbMtxWorld, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapRes);
+	VS_CB_WORLD_MATRIX* wMtx = (VS_CB_WORLD_MATRIX*)mapRes.pData;
+	D3DXMatrixTranspose(&wMtx->mtxWorld, mWorld);
+	deviceContext->Unmap(cbMtxWorld, 0);
+
+	deviceContext->VSSetConstantBuffers(VS_SLOT_WORLD_MATRIX, 1, &cbMtxWorld);
 }

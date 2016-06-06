@@ -16,7 +16,7 @@ public:
 
 	bool ProcessInput();
 	void AnimateObject(float elapsedTime);
-	void Render(ID3D11DeviceContext* deviceContext);
+	void Render(ID3D11DeviceContext* deviceContext, CCamera* camera);
 
 private:
 	std::vector<CGameObject*> objectList;

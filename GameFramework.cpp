@@ -87,7 +87,37 @@ bool CGameFramework::CreateDirect3DDisplay()
 void CGameFramework::BuildObject()
 {
 	scene = new CScene;
+
+	player = new CPlayer;
+
+	CCamera* cam = new CCamera;
+	cam->CreateShaderVariable(d3dDevice);
+	cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
+
+	cam->CreateProjectionMatrix(1.0, 500.0f, clientWidth / (float)clientHeight, 90.0f);
+
+	D3DXVECTOR3 eyePos{ 0.0f,0.0f,-2.0f };
+	D3DXVECTOR3 lookAt{ 0.0f,0.0f,0.0f };
+	D3DXVECTOR3 up{ 0.0f,1.0f,0.0f };
+	cam->CreateViewMatrix(eyePos, lookAt, up);
+
+	player->SetCamera(cam);
+	player->CreateShaderVariables(d3dDevice);
+
 	if (scene) scene->BuildObject(d3dDevice);
+
+	D3DXCOLOR color{ 1.0f,0.0f,0.0f,1.0f };
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(D3DXCOLOR);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	D3D11_SUBRESOURCE_DATA data;
+	ZeroMemory(&data, sizeof(data));
+	data.pSysMem = &color;
+	d3dDevice->CreateBuffer(&bd, &data, &cbColor);
+	d3dDeviceContext->PSSetConstantBuffers(PS_SLOT_COLOR, 1, &cbColor);
 }
 
 void CGameFramework::ReleaseObject()
@@ -97,6 +127,9 @@ void CGameFramework::ReleaseObject()
 		scene->ReleaseObject();
 		delete scene;
 	}
+
+	if (player) delete player;
+	if (cbColor) cbColor->Release();
 }
 
 void CGameFramework::ProcessInput()
@@ -105,18 +138,23 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObject()
 {
+	scene->AnimateObject(timer.GetTimeElapsed());
 }
 
 void CGameFramework::FrameAdvance()
 {
-	timer.Tick();
+	timer.Tick(0);
 	ProcessInput();
 	AnimateObject();
 
 	float fClearColor[4] = { 0.75f, 0.75f, 1.0f, 1.0f };
 	d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
-	scene->Render(d3dDeviceContext);
-	dxgiSwapChain->Present(0, 0);
+
+	if (player) player->UpdateShaderVariables(d3dDeviceContext);
+	CCamera* cam = player ? player->GetCamera() : nullptr;
+	if (scene)scene->Render(d3dDeviceContext, cam);
+
+	dxgiSwapChain->Present(1, 0);
 
 	int textLen = lstrlen(TEXT("DirectX Project "));
 	timer.GetFrameRate(captionBuffer + textLen, 49 - textLen);
@@ -150,6 +188,18 @@ void CGameFramework::OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 		case VK_ESCAPE:
 			PostQuitMessage(0);
 			break;
+		case VK_F1:
+		case VK_F2:
+		case VK_F3:
+		{
+			D3DXCOLOR newColor = (wParam == VK_F1) ? D3DXCOLOR{ 1.0f, 0.0f, 0.0f, 1.0f } : ((wParam == VK_F2) ? D3DXCOLOR{ 0.0f,1.0f,0.0f,1.0f } : D3DXCOLOR{ 0.0f,0.0f,1.0f,1.0f });
+			D3D11_MAPPED_SUBRESOURCE mapRes;
+			d3dDeviceContext->Map(cbColor, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapRes);
+			D3DXCOLOR* color = (D3DXCOLOR*)mapRes.pData;
+			*color = newColor;
+			d3dDeviceContext->Unmap(cbColor, 0);
+			break;
+		}
 		default:
 			break;
 		}

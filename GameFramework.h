@@ -42,5 +42,6 @@ private:
 	CScene* scene;
 
 	CPlayer* player;
+	ID3D11Buffer* cbColor;
 };
 
