@@ -1,5 +1,7 @@
 #pragma once
 
+inline D3DXCOLOR RANDOM_COLOR() { return D3DXCOLOR{ (UINT)(rand() * 0xffffff) / RAND_MAX }; }
+
 class CVertex
 {
 public:
@@ -57,3 +59,14 @@ public:
 	virtual void CreateRasterizerState(ID3D11Device* device);
 };
 
+class CCubeMesh : public CMesh
+{
+public:
+	CCubeMesh(ID3D11Device* device, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
+	virtual ~CCubeMesh();
+
+	virtual void CreateRasterizerState(ID3D11Device* device);
+	virtual void Render(ID3D11DeviceContext* deviceContext);
+private:
+
+};
