@@ -25,6 +25,7 @@
 #include <D3DX10math.h>
 #include <chrono>
 #include <stdio.h>
+#include <time.h>
 
 const int FRAME_BUFFER_WIDTH{ 640 };
 const int FRAME_BUFFER_HEIGHT{ 480 };

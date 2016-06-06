@@ -4,6 +4,7 @@
 
 CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }, player{ nullptr }
 {
+	srand(time(nullptr));
 	_tcscpy_s(captionBuffer, TEXT("DirectX Project "));
 }
 

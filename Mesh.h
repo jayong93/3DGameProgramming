@@ -1,6 +1,6 @@
 #pragma once
 
-inline D3DXCOLOR RANDOM_COLOR() { return D3DXCOLOR{ (UINT)(rand() * 0xffffff) / RAND_MAX }; }
+inline D3DXCOLOR RANDOM_COLOR() { return D3DXCOLOR{ (UINT)((rand() * 0xffffff) / RAND_MAX) }; }
 
 class CVertex
 {
@@ -28,7 +28,7 @@ private:
 class CMesh
 {
 public:
-	CMesh();
+	CMesh(D3D11_FILL_MODE type);
 	virtual ~CMesh();
 	void AddRef();
 	void Release();
@@ -40,9 +40,15 @@ protected:
 	UINT vertexCnt;
 	UINT strideByte;
 	UINT offset;
+	
+	ID3D11Buffer* indexBuffer;
+	UINT indexCnt;
+	UINT startIndex;
+	int baseVertex;
 
 	D3D11_PRIMITIVE_TOPOLOGY primitiveTopology;
 	ID3D11RasterizerState* rasterizserState;
+	D3D11_FILL_MODE drawType;
 
 private:
 	int reference;
@@ -52,7 +58,7 @@ private:
 class CTriangleMesh : public CMesh
 {
 public:
-	CTriangleMesh(ID3D11Device* device);
+	CTriangleMesh(ID3D11Device* device, D3D11_FILL_MODE type);
 	virtual ~CTriangleMesh();
 
 	virtual void Render(ID3D11DeviceContext* deviceContext);
@@ -62,11 +68,9 @@ public:
 class CCubeMesh : public CMesh
 {
 public:
-	CCubeMesh(ID3D11Device* device, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
+	CCubeMesh(ID3D11Device* device, D3D11_FILL_MODE type, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
 	virtual ~CCubeMesh();
 
 	virtual void CreateRasterizerState(ID3D11Device* device);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
-private:
-
 };
