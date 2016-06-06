@@ -10,6 +10,19 @@ private:
 	D3DXVECTOR3 position;
 };
 
+class CDiffusedVertex
+{
+public:
+	CDiffusedVertex(float x, float y, float z, D3DXCOLOR color) : position{ D3DXVECTOR3{x,y,z} }, diffuse{ color } {}
+	CDiffusedVertex(D3DXVECTOR3 pos, D3DXCOLOR color) : position{ pos }, diffuse{ color } {}
+	CDiffusedVertex() : position{ 0,0,0 }, diffuse{ 0,0,0,0 } {}
+	~CDiffusedVertex() {}
+
+private:
+	D3DXVECTOR3 position;
+	D3DXCOLOR diffuse;
+};
+
 class CMesh
 {
 public:

@@ -1,6 +1,19 @@
 #include "stdafx.h"
 #include "Shader.h"
 
+BYTE* ReadCompiledEffectFile(LPCTSTR fileName, int* readBytes)
+{
+	FILE* file{ nullptr };
+	_tfopen_s(&file, fileName, TEXT("rb"));
+	fseek(file, 0, SEEK_END);
+	int fileSize = ftell(file);
+	BYTE* byteCode = new BYTE[fileSize];
+	rewind(file);
+	*readBytes = fread(byteCode, sizeof(BYTE), fileSize, file);
+	fclose(file);
+
+	return byteCode;
+}
 
 CShader::CShader() : vertexShader{ nullptr }, pixelShader{ nullptr }, vertexLayout{ nullptr }, reference{ 0 }, cbMtxWorld{ nullptr }
 {
@@ -45,15 +58,35 @@ void CShader::CreatePixelShaderFromFile(ID3D11Device * device, TCHAR * fileName,
 	}
 }
 
+void CShader::CreateVertexShaderFromCompiledFile(ID3D11Device * device, TCHAR * fileName, D3D11_INPUT_ELEMENT_DESC * inputLayout, UINT elementCnt)
+{
+	int readBytes{ 0 };
+	BYTE* byteCode = ReadCompiledEffectFile(fileName, &readBytes);
+	HRESULT r = device->CreateVertexShader(byteCode, readBytes, nullptr, &vertexShader);
+	device->CreateInputLayout(inputLayout, elementCnt, byteCode, readBytes, &vertexLayout);
+
+	if (byteCode) delete[] byteCode;
+}
+
+void CShader::CreatePixelShaderFromCompiledFile(ID3D11Device * device, TCHAR * fileName)
+{
+	int readBytes{ 0 };
+	BYTE* byteCode = ReadCompiledEffectFile(fileName, &readBytes);
+	HRESULT r = device->CreatePixelShader(byteCode, readBytes, nullptr, &pixelShader);
+
+	if (byteCode) delete[] byteCode;
+}
+
 void CShader::CreateShader(ID3D11Device * device)
 {
 	D3D11_INPUT_ELEMENT_DESC inLayout[]
 	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	UINT elementCnt = ARRAYSIZE(inLayout);
-	CreateVertexShaderFromFile(device, TEXT("Effect.fx"), "VS", "vs_5_0", &vertexShader, inLayout, elementCnt, &vertexLayout);
-	CreatePixelShaderFromFile(device, TEXT("Effect.fx"), "PS", "ps_5_0", &pixelShader);
+	CreateVertexShaderFromCompiledFile(device, TEXT("VS.fxo"), inLayout, elementCnt);
+	CreatePixelShaderFromCompiledFile(device, TEXT("PS.fxo"));
 	CreateShaderVariables(device);
 }
 
