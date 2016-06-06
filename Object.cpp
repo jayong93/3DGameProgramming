@@ -42,7 +42,7 @@ void CGameObject::Render(ID3D11DeviceContext * deviceContext)
 	if (mesh) mesh->Render(deviceContext);
 }
 
-CRotatingObject::CRotatingObject()
+CRotatingObject::CRotatingObject(float yAngle) : CGameObject(), yAnglePerSecond{ yAngle }
 {
 }
 
@@ -52,12 +52,19 @@ CRotatingObject::~CRotatingObject()
 
 void CRotatingObject::Animate(float deltaTime)
 {
-	D3DXMATRIX rMatrix;
-	D3DXMatrixRotationY(&rMatrix, (float)D3DXToRadian(45.0f*deltaTime));
+	D3DXMATRIX rMatrix, tMatrix;
+	D3DXMatrixRotationY(&rMatrix, (float)D3DXToRadian(yAnglePerSecond*deltaTime));
 	mtxWorld = rMatrix * mtxWorld;
+	D3DXMatrixTranslation(&tMatrix, velocity.x*deltaTime, velocity.y*deltaTime, velocity.z*deltaTime);
+	mtxWorld = mtxWorld * tMatrix;
 }
 
 void CRotatingObject::Render(ID3D11DeviceContext * deviceContext)
 {
 	CGameObject::Render(deviceContext);
+}
+
+void CRotatingObject::SetVelocity(float vx, float vy, float vz)
+{
+	velocity.x = vx; velocity.y = vy; velocity.z = vz;
 }

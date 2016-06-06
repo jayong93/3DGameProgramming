@@ -17,6 +17,8 @@ public:
 	virtual void Animate(float deltaTime);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 
+	void SetPos(const D3DXVECTOR3& pos) { mtxWorld._41 = pos.x; mtxWorld._42 = pos.y; mtxWorld._43 = pos.z; }
+
 	D3DXMATRIX mtxWorld;
 	CMesh* mesh;
 	CShader* shader;
@@ -27,10 +29,16 @@ private:
 class CRotatingObject : public CGameObject
 {
 public:
-	CRotatingObject();
+	// degree angle
+	CRotatingObject(float yAngle);
 	virtual ~CRotatingObject();
 
 	virtual void Animate(float deltaTime);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
+	void SetVelocity(float vx, float vy, float vz);
+
+protected:
+	float yAnglePerSecond;
+	D3DXVECTOR3 velocity{ 0,0,0 };
 };
 

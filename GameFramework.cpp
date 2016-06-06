@@ -5,6 +5,7 @@
 CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }, player{ nullptr }
 {
 	_tcscpy_s(captionBuffer, TEXT("DirectX Project "));
+	srand(time(nullptr));
 }
 
 
@@ -33,6 +34,8 @@ void CGameFramework::OnDestroy()
 	if (dxgiSwapChain) dxgiSwapChain->Release();
 	if (d3dDeviceContext) d3dDeviceContext->Release();
 	if (d3dDevice) d3dDevice->Release();
+	if (depthStencilBuffer) depthStencilBuffer->Release();
+	if (depthStencilView) depthStencilView->Release();
 }
 
 bool CGameFramework::CreateRenderTargetView()
@@ -79,7 +82,42 @@ bool CGameFramework::CreateDirect3DDisplay()
 	hResult = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, nullptr, 0, D3D11_SDK_VERSION, &dxgiSwapChainDesc, &dxgiSwapChain, &d3dDevice, &nd3dFeatureLevel, &d3dDeviceContext);
 	if (!dxgiSwapChain || !d3dDevice || !d3dDeviceContext) return false;
 	if (nd3dFeatureLevel != D3D_FEATURE_LEVEL_11_0) return false;
-	if (!CreateRenderTargetView()) return false;
+	if (!CreateRenderTargetDepthStencilView()) return false;
+
+	return true;
+}
+
+bool CGameFramework::CreateRenderTargetDepthStencilView()
+{
+	HRESULT hResult{ S_OK };
+
+	ID3D11Texture2D *d3dBackBuffer;
+	if (FAILED(hResult = dxgiSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&d3dBackBuffer))) return false;
+	if (FAILED(hResult = d3dDevice->CreateRenderTargetView(d3dBackBuffer, nullptr, &d3dRenderTargetView))) return false;
+	if (d3dBackBuffer) d3dBackBuffer->Release();
+
+	D3D11_TEXTURE2D_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Width = clientWidth;
+	bd.Height = clientHeight;
+	bd.MipLevels = 1;
+	bd.ArraySize = 1;
+	bd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	bd.SampleDesc.Count = 1;
+	bd.SampleDesc.Quality = 0;
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	if (FAILED(hResult = d3dDevice->CreateTexture2D(&bd, nullptr, &depthStencilBuffer))) return false;
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC vd;
+	ZeroMemory(&vd, sizeof(vd));
+	vd.Format = bd.Format;
+	vd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	vd.Texture2D.MipSlice = 0;
+	if (FAILED(hResult = d3dDevice->CreateDepthStencilView(depthStencilBuffer, &vd, &depthStencilView))) return false;
+
+	d3dDeviceContext->OMSetRenderTargets(1, &d3dRenderTargetView, depthStencilView);
 
 	return true;
 }
@@ -96,7 +134,7 @@ void CGameFramework::BuildObject()
 
 	cam->CreateProjectionMatrix(1.0, 500.0f, clientWidth / (float)clientHeight, 90.0f);
 
-	D3DXVECTOR3 eyePos{ 0.0f,15.0f,-75.0f };
+	D3DXVECTOR3 eyePos{ 0.0f,15.0f,-55.0f };
 	D3DXVECTOR3 lookAt{ 0.0f,0.0f,0.0f };
 	D3DXVECTOR3 up{ 0.0f,1.0f,0.0f };
 	cam->CreateViewMatrix(eyePos, lookAt, up);
@@ -148,7 +186,10 @@ void CGameFramework::FrameAdvance()
 	AnimateObject();
 
 	float fClearColor[4] = { 0.75f, 0.75f, 1.0f, 1.0f };
-	d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
+	if (d3dRenderTargetView)
+		d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
+	if (depthStencilView)
+		d3dDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	if (player) player->UpdateShaderVariables(d3dDeviceContext);
 	CCamera* cam = player ? player->GetCamera() : nullptr;
@@ -221,10 +262,12 @@ LRESULT CGameFramework::OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LP
 		d3dDeviceContext->OMSetRenderTargets(0, NULL, NULL);
 
 		if (d3dRenderTargetView) d3dRenderTargetView->Release();
+		if (depthStencilBuffer) depthStencilBuffer->Release();
+		if (depthStencilView) depthStencilView->Release();
 
 		dxgiSwapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
-		CreateRenderTargetView();
+		CreateRenderTargetDepthStencilView();
 		CCamera* cam = player->GetCamera();
 		if (cam) cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
 		break;

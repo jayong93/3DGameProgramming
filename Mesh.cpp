@@ -185,54 +185,55 @@ CWireCubeMesh::CWireCubeMesh(ID3D11Device * device, float width, float height, f
 	CDiffusedVertex v[36];
 	int i = 0;
 
+	D3DXCOLOR black{ 0.0f,0.0f,0.0f,1.0f };
 	//정점 버퍼 데이터는 삼각형 리스트이므로 36개의 정점 데이터를 준비한다.
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), black);
 
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), black);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), black);
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
