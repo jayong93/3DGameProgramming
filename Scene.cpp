@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Scene.h"
 
 CScene::CScene()
@@ -25,7 +25,7 @@ void CScene::BuildObject(ID3D11Device * device)
 	CShader* shader{ new CShader };
 	shader->CreateShader(device);
 
-	// ¿Ü°û Å¥ºê
+	// ì™¸ê³½ íë¸Œ
 	CWireCubeMesh* wMesh{ new CWireCubeMesh{device, 45.0f, 45.0f, 45.0f} };
 	CGameObject* obj{ new CGameObject };
 	obj->SetMesh(wMesh);
@@ -33,13 +33,20 @@ void CScene::BuildObject(ID3D11Device * device)
 
 	objectList.emplace_back(obj);
 
-	// ³»ºÎ Å¥ºêµé
 	CCubeMesh* cMesh{ new CCubeMesh{device} };
+	// í”Œë ˆì´ì–´ íë¸Œ
+	obj = new CGameObject;
+	obj->SetMesh(cMesh);
+	obj->SetShader(shader);
+
+	objectList.emplace_back(obj);
+
+	// ë‚´ë¶€ íë¸Œë“¤
 	CRotatingObject* rObj;
 	for (int i = 0; i < 50; i++)
 	{
 		rObj = new CRotatingObject{ RandomRangeFloat(0.0f,90.0f) };
-		rObj->SetPos(D3DXVECTOR3{ RandomRangeFloat(-20,20),RandomRangeFloat(-20,20),RandomRangeFloat(-20,20) });
+		rObj->SetPos(D3DXVECTOR3{ RandomRangeFloat(-20.0f,20.0f),RandomRangeFloat(-20.0f,20.0f),RandomRangeFloat(-20.0f,20.0f) });
 		D3DXVECTOR3 vel{ RandomRangeFloat(-1.0f,1.0f), RandomRangeFloat(-1.0f,1.0f), RandomRangeFloat(-1.0f,1.0f) };
 		D3DXVec3Normalize(&vel, &vel);
 		vel *= 5.0f;
@@ -70,28 +77,30 @@ void CScene::AnimateObject(float elapsedTime)
 		o->Animate(elapsedTime);
 	}
 
-	// Ãæµ¹ Ã³¸®
+	// ì¶©ëŒ ì²˜ë¦¬
 	CGameObject* outerCube{ objectList.front() };
 	D3DXPLANE plane[6];
 	CMesh* mesh = outerCube->mesh;
-	// ¿Ü°û Å¥ºê Æò¸é ±¸ÇÏ±â
+	// ì™¸ê³½ íë¸Œ í‰ë©´ êµ¬í•˜ê¸°
 	for (int i = 0, j = 0; j < 6 && i < mesh->GetVertexCount(); i += 6, ++j)
 	{
 		D3DXPlaneFromPoints(plane + j, &mesh->GetVertexData(i).GetPosition(), &mesh->GetVertexData(i + 1).GetPosition(), &mesh->GetVertexData(i + 2).GetPosition());
 		D3DXPlaneNormalize(plane + j, plane + j);
 	}
-	// Ãæµ¹Ã¼Å© ¹× ¹İ»ç
-	for (auto it = objectList.begin() + 1; it != objectList.end(); ++it)
+	// ì¶©ëŒì²´í¬ ë° ë°˜ì‚¬
+	for (auto it = objectList.begin() + 2; it != objectList.end(); ++it)
 	{
 		bool needReflection{ false };
 		D3DXVECTOR3 planeNormal;
-		auto pos = (*it)->GetPos();
+		D3DXVECTOR3 vertex;
 		const CMesh& m = *(*it)->mesh;
 		for (int i = 0; i < m.GetVertexCount() && !needReflection; ++i)
 		{
+			vertex = m.GetVertexData(i).GetPosition();
+			D3DXVec3TransformCoord(&vertex, &vertex, &(*it)->mtxWorld);
 			for (int j = 0; j < 6; ++j)
 			{
-				if (D3DXPlaneDotCoord(plane + j, &(m.GetVertexData(i).GetPosition() + pos)) > 0)
+				if (D3DXPlaneDotCoord(plane + j, &vertex) > 0)
 				{
 					needReflection = true;
 					memcpy_s(&planeNormal, sizeof(float) * 3, plane + j, sizeof(float) * 3);
@@ -113,6 +122,6 @@ void CScene::AnimateObject(float elapsedTime)
 
 void CScene::Render(ID3D11DeviceContext * deviceContext, CCamera* camera)
 {
-	for (auto& o : objectList)
+	for (auto o : objectList)
 		o->Render(deviceContext);
 }
