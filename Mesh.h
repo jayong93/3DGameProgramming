@@ -14,6 +14,30 @@ class CMesh
 {
 public:
 	CMesh();
-	~CMesh();
+	virtual ~CMesh();
+	void AddRef();
+	void Release();
+	virtual void Render(ID3D11DeviceContext* deviceContext);
+
+protected:
+	ID3D11Buffer* vertexBuffer;
+	UINT vertexCnt;
+	UINT strideByte;
+	UINT offset;
+
+	D3D11_PRIMITIVE_TOPOLOGY primitiveTopology;
+
+private:
+	int reference;
+
+};
+
+class CTriangleMesh : public CMesh
+{
+public:
+	CTriangleMesh(ID3D11Device* device);
+	virtual ~CTriangleMesh();
+
+	virtual void Render(ID3D11DeviceContext* deviceContext);
 };
 

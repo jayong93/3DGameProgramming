@@ -35,6 +35,18 @@ void CGameFramework::OnDestroy()
 	if (d3dDevice) d3dDevice->Release();
 }
 
+void CGameFramework::SetViewport()
+{
+	D3D11_VIEWPORT view;
+	view.TopLeftX = 0.0f;
+	view.TopLeftY = 0.0f;
+	view.Width = (float)clientWidth;
+	view.Height = (float)clientHeight;
+	view.MinDepth = 0.0f;
+	view.MaxDepth = 1.0f;
+	d3dDeviceContext->RSSetViewports(1, &view);
+}
+
 bool CGameFramework::CreateRenderTargetView()
 {
 	HRESULT hResult{ S_OK };
@@ -80,16 +92,24 @@ bool CGameFramework::CreateDirect3DDisplay()
 	if (!dxgiSwapChain || !d3dDevice || !d3dDeviceContext) return false;
 	if (nd3dFeatureLevel != D3D_FEATURE_LEVEL_11_0) return false;
 	if (!CreateRenderTargetView()) return false;
+	SetViewport();
 
 	return true;
 }
 
 void CGameFramework::BuildObject()
 {
+	scene = new CScene;
+	if (scene) scene->BuildObject(d3dDevice);
 }
 
 void CGameFramework::ReleaseObject()
 {
+	if (scene)
+	{
+		scene->ReleaseObject();
+		delete scene;
+	}
 }
 
 void CGameFramework::ProcessInput()
@@ -106,11 +126,13 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 	AnimateObject();
 
-	float fClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	float fClearColor[4] = { 0.75f, 0.75f, 1.0f, 1.0f };
 	d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
+	scene->Render(d3dDeviceContext);
 	dxgiSwapChain->Present(0, 0);
 
-	timer.GetFrameRate(captionBuffer + 16, 32);
+	int textLen = lstrlen(TEXT("DirectX Project "));
+	timer.GetFrameRate(captionBuffer + textLen, 49 - textLen);
 	SetWindowText(hWnd, captionBuffer);
 }
 
@@ -166,6 +188,7 @@ LRESULT CGameFramework::OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LP
 		dxgiSwapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
 		CreateRenderTargetView();
+		SetViewport();
 
 		break;
 	}

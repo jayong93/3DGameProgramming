@@ -1,5 +1,6 @@
 #pragma once
 #include "Timer.h"
+#include "Scene.h"
 
 class CGameFramework
 {
@@ -10,6 +11,7 @@ public:
 	bool OnCreate(HINSTANCE ghInst, HWND hMainWnd);
 	void OnDestroy();
 
+	void SetViewport();
 	bool CreateRenderTargetView();
 	bool CreateDirect3DDisplay();
 
@@ -37,5 +39,6 @@ private:
 
 	CTimer timer;
 	TCHAR captionBuffer[50];
+	CScene* scene;
 };
 

@@ -1,4 +1,7 @@
 #pragma once
+#include "Object.h"
+#include <vector>
+
 class CScene
 {
 public:
@@ -14,5 +17,8 @@ public:
 	bool ProcessInput();
 	void AnimateObject(float elapsedTime);
 	void Render(ID3D11DeviceContext* deviceContext);
+
+private:
+	std::vector<CGameObject*> objectList;
 };
 
