@@ -27,3 +27,6 @@
 
 const int FRAME_BUFFER_WIDTH{ 640 };
 const int FRAME_BUFFER_HEIGHT{ 480 };
+
+const int VS_SLOT_CAMERA{ 0x00 };
+const int VS_SLOT_WORLD_MATRIX{ 0x01 };

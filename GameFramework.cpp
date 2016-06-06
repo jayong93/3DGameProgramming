@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 
 
-CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }
+CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }, player{ nullptr }
 {
 	_tcscpy_s(captionBuffer, TEXT("DirectX Project "));
 }
@@ -33,18 +33,6 @@ void CGameFramework::OnDestroy()
 	if (dxgiSwapChain) dxgiSwapChain->Release();
 	if (d3dDeviceContext) d3dDeviceContext->Release();
 	if (d3dDevice) d3dDevice->Release();
-}
-
-void CGameFramework::SetViewport()
-{
-	D3D11_VIEWPORT view;
-	view.TopLeftX = 0.0f;
-	view.TopLeftY = 0.0f;
-	view.Width = (float)clientWidth;
-	view.Height = (float)clientHeight;
-	view.MinDepth = 0.0f;
-	view.MaxDepth = 1.0f;
-	d3dDeviceContext->RSSetViewports(1, &view);
 }
 
 bool CGameFramework::CreateRenderTargetView()
@@ -92,7 +80,6 @@ bool CGameFramework::CreateDirect3DDisplay()
 	if (!dxgiSwapChain || !d3dDevice || !d3dDeviceContext) return false;
 	if (nd3dFeatureLevel != D3D_FEATURE_LEVEL_11_0) return false;
 	if (!CreateRenderTargetView()) return false;
-	SetViewport();
 
 	return true;
 }
@@ -188,8 +175,8 @@ LRESULT CGameFramework::OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LP
 		dxgiSwapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
 		CreateRenderTargetView();
-		SetViewport();
-
+		CCamera* cam = player->GetCamera();
+		if (cam) cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
 		break;
 	}
 	case WM_LBUTTONDOWN:
