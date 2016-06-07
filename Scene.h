@@ -18,7 +18,7 @@ public:
 	void AnimateObject(float elapsedTime);
 	void Render(ID3D11DeviceContext* deviceContext, CCamera* camera);
 
-	bool CheckRayCast(D3DXVECTOR3 const& rayStart, D3DXVECTOR3 const& rayDir);
+	bool CheckRayCast(ID3D11Device* device, D3DXVECTOR3 const& rayStart, D3DXVECTOR3 const& rayDir);
 
 private:
 	std::vector<CGameObject*> objectList;

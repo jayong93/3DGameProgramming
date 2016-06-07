@@ -267,3 +267,54 @@ void CWireCubeMesh::Render(ID3D11DeviceContext * deviceContext)
 {
 	CMesh::Render(deviceContext);
 }
+
+CBulletMesh::CBulletMesh(ID3D11Device * device, D3DXVECTOR3 const& target)
+{
+	vertexCnt = 2;
+	strideByte = sizeof(CDiffusedVertex);
+	offset = 0;
+	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+
+	vertexList = new CDiffusedVertex[vertexCnt];
+	int i = 0;
+
+	D3DXVECTOR3 dir{ target };
+	D3DXVec3Normalize(&dir, &dir);
+	D3DXVec3Scale(&dir, &dir, 5.0f);
+	D3DXCOLOR red{ 1.0f,0.0f,0.0f,1.0f };
+
+	vertexList[i++] = CDiffusedVertex(D3DXVECTOR3(0,0,0), red);
+	vertexList[i++] = CDiffusedVertex(dir, red);
+	
+
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = strideByte*vertexCnt;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA data;
+	ZeroMemory(&data, sizeof(data));
+	data.pSysMem = vertexList;
+	device->CreateBuffer(&bd, &data, &vertexBuffer);
+
+	CreateRasterizerState(device);
+}
+
+CBulletMesh::~CBulletMesh()
+{
+}
+
+void CBulletMesh::CreateRasterizerState(ID3D11Device * device)
+{
+	D3D11_RASTERIZER_DESC rd;
+	ZeroMemory(&rd, sizeof(rd));
+	rd.CullMode = D3D11_CULL_NONE;
+	rd.FillMode = D3D11_FILL_WIREFRAME;
+	device->CreateRasterizerState(&rd, &rasterizserState);
+}
+
+void CBulletMesh::Render(ID3D11DeviceContext * deviceContext)
+{
+	CMesh::Render(deviceContext);
+}

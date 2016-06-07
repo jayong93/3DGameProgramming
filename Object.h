@@ -24,6 +24,8 @@ public:
 	D3DXMATRIX mtxWorld;
 	CMesh* mesh;
 	CShader* shader;
+
+	bool isAlive{ true };
 private:
 	int reference;
 };
@@ -45,3 +47,16 @@ protected:
 	D3DXVECTOR3 velocity{ 0,0,0 };
 };
 
+class CBullet : public CGameObject
+{
+public:
+	CBullet(D3DXVECTOR3 const& dir, float limit) : direction{ dir }, limitDistance{ limit } {}
+	virtual ~CBullet();
+
+	virtual void Animate(float deltaTime);
+	virtual void Render(ID3D11DeviceContext* deviceContext);
+private:
+	D3DXVECTOR3 direction;
+	float moveDistance{ 0 }, limitDistance;
+	float speed{ 500 };
+};

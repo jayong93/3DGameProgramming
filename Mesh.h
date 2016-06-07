@@ -82,3 +82,13 @@ public:
 	virtual void CreateRasterizerState(ID3D11Device* device);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 };
+
+class CBulletMesh : public CMesh
+{
+public:
+	CBulletMesh(ID3D11Device* device, D3DXVECTOR3 const& target);
+	virtual ~CBulletMesh();
+
+	virtual void CreateRasterizerState(ID3D11Device* device);
+	virtual void Render(ID3D11DeviceContext* deviceContext);
+};

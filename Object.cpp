@@ -96,3 +96,22 @@ void CRotatingObject::SetVelocity(float vx, float vy, float vz)
 {
 	velocity.x = vx; velocity.y = vy; velocity.z = vz;
 }
+
+CBullet::~CBullet()
+{
+}
+
+void CBullet::Animate(float deltaTime)
+{
+	D3DXMATRIX tMatrix;
+	D3DXVECTOR3 moveVec{ direction*speed*deltaTime };
+	D3DXMatrixTranslation(&tMatrix, moveVec.x, moveVec.y, moveVec.z);
+	mtxWorld = mtxWorld * tMatrix;
+	moveDistance += D3DXVec3Length(&moveVec);
+	if (limitDistance <= moveDistance) isAlive = false;
+}
+
+void CBullet::Render(ID3D11DeviceContext * deviceContext)
+{
+	CGameObject::Render(deviceContext);
+}

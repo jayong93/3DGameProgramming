@@ -209,7 +209,7 @@ void CGameFramework::OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARA
 		vPickPosition.y = -(((2.0f * y) / viewport.Height) - 1) / mtxProjection._22;
 		vPickPosition.z = 1.0f;
 
-		scene->CheckRayCast(cam->GetPosition(), vPickPosition);
+		scene->CheckRayCast(d3dDevice, cam->GetPosition(), vPickPosition);
 		break;
 	}
 	case WM_LBUTTONUP:

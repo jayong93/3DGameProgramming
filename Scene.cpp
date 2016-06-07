@@ -72,9 +72,12 @@ bool CScene::ProcessInput()
 
 void CScene::AnimateObject(float elapsedTime)
 {
-	for (auto& o : objectList)
+	for (auto it = objectList.begin(); it != objectList.end();)
 	{
-		o->Animate(elapsedTime);
+		(*it)->Animate(elapsedTime);
+		if (!(*it)->isAlive)
+			it = objectList.erase(it);
+		else ++it;
 	}
 
 	// 충돌 처리
@@ -126,7 +129,7 @@ void CScene::Render(ID3D11DeviceContext * deviceContext, CCamera* camera)
 		o->Render(deviceContext);
 }
 
-bool CScene::CheckRayCast(D3DXVECTOR3 const & rayStart, D3DXVECTOR3 const& rayDir)
+bool CScene::CheckRayCast(ID3D11Device* device, D3DXVECTOR3 const & rayStart, D3DXVECTOR3 const& rayDir)
 {
 	float minDist{ -1 };
 	auto pickingObj{ objectList.end() };
@@ -146,7 +149,20 @@ bool CScene::CheckRayCast(D3DXVECTOR3 const & rayStart, D3DXVECTOR3 const& rayDi
 
 	if (pickingObj != objectList.end())
 	{
-		objectList.erase(pickingObj);
+		(*pickingObj)->isAlive = false;
+		// 총알 생성
+		D3DXVECTOR3 targetPos = (*pickingObj)->GetPos();
+		D3DXVECTOR3 playerPos = objectList[1]->GetPos();
+		D3DXVECTOR3 dir = targetPos - playerPos;
+		float length = D3DXVec3Length(&dir);
+		D3DXVec3Normalize(&dir, &dir);
+
+		CBulletMesh* bm = new CBulletMesh{device, dir};
+		CBullet* b = new CBullet{ dir, length-5 };
+		b->SetMesh(bm);
+		b->SetShader(objectList[0]->shader);
+		objectList.emplace_back(b);
+		
 		return true;
 	}
 
