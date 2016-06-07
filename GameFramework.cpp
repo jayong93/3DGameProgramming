@@ -196,24 +196,20 @@ void CGameFramework::OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARA
 	{
 		// ÇÇÅ·
 		float x = LOWORD(lParam), y = HIWORD(lParam);
-		D3DXVECTOR3 ray{ 320,240,1 };
-
 		CCamera* cam = player->GetCamera();
 		D3D11_VIEWPORT camView = cam->GetViewport();
-		D3D10_VIEWPORT view;
-		view.TopLeftX = camView.TopLeftX;
-		view.TopLeftY = camView.TopLeftY;
-		view.Width = camView.Width;
-		view.Height = camView.Height;
-		view.MinDepth = camView.MinDepth;
-		view.MaxDepth = camView.MaxDepth;
 
-		D3DXMATRIX idm;
-		D3DXMatrixIdentity(&idm);
-		D3DXVec3Unproject(&ray, &ray, &view, &cam->GetProjectionMatrix(), &cam->GetViewMatrix(), &idm);
+		D3DXMATRIX mtxView = cam->GetViewMatrix();
+		D3DXMATRIX mtxProjection = cam->GetProjectionMatrix();
+		D3D11_VIEWPORT viewport = cam->GetViewport();
 
-		D3DXVec3Normalize(&ray, &ray);
-		scene->CheckRayCast(cam->GetPosition(), ray);
+		D3DXVECTOR3 vPickPosition;
+
+		vPickPosition.x = (((2.0f * x) / viewport.Width) - 1) / mtxProjection._11;
+		vPickPosition.y = -(((2.0f * y) / viewport.Height) - 1) / mtxProjection._22;
+		vPickPosition.z = 1.0f;
+
+		scene->CheckRayCast(cam->GetPosition(), vPickPosition);
 		break;
 	}
 	case WM_LBUTTONUP:

@@ -47,16 +47,14 @@ bool CGameObject::CheckRayCast(D3DXVECTOR3 const& rayStart, D3DXVECTOR3 const& r
 	if (mesh)
 	{
 		float minDist{ -1 }, curDist{ -1 };
-		D3DXVECTOR3 localStart, localDir;
-		D3DXMATRIX invMtxWorld;
-		D3DXMatrixTranspose(&invMtxWorld, &mtxWorld);
-		D3DXVec3TransformCoord(&localStart, &rayStart, &invMtxWorld);
-		D3DXVec3TransformCoord(&localDir, &rayDir, &invMtxWorld);
 
 		for (int i = 0; i < mesh->GetVertexCount(); i += 3)
 		{
-			D3DXVECTOR3 vertex[3]{ mesh->GetVertexData(i).GetPosition(), mesh->GetVertexData(i + 1).GetPosition() , mesh->GetVertexData(i + 2).GetPosition() };
-			if (D3DXIntersectTri(vertex, vertex + 1, vertex + 2, &localStart, &localDir, nullptr, nullptr, &curDist))
+			D3DXVECTOR3 vertex[]{ mesh->GetVertexData(i).GetPosition(), mesh->GetVertexData(i + 1).GetPosition() , mesh->GetVertexData(i + 2).GetPosition() };
+			for (int j = 0; j < 3; ++j)
+				D3DXVec3TransformCoord(vertex + j, vertex + j, &mtxWorld);
+
+			if (D3DXIntersectTri(vertex, vertex + 1, vertex + 2, &rayStart, &rayDir, nullptr, nullptr, &curDist))
 			{
 				if (minDist < 0 || minDist > curDist) minDist = curDist;
 			}
