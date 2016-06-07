@@ -42,9 +42,33 @@ void CGameObject::Render(ID3D11DeviceContext * deviceContext)
 	if (mesh) mesh->Render(deviceContext);
 }
 
-bool CGameObject::RayCast(const D3DXVECTOR3 & ray) const
+bool CGameObject::CheckRayCast(D3DXVECTOR3 const& rayStart, D3DXVECTOR3 const& rayDir, float* dist) const
 {
+	if (mesh)
+	{
+		float minDist{ -1 }, curDist{ -1 };
+		D3DXVECTOR3 localStart, localDir;
+		D3DXMATRIX invMtxWorld;
+		D3DXMatrixTranspose(&invMtxWorld, &mtxWorld);
+		D3DXVec3TransformCoord(&localStart, &rayStart, &invMtxWorld);
+		D3DXVec3TransformCoord(&localDir, &rayDir, &invMtxWorld);
 
+		for (int i = 0; i < mesh->GetVertexCount(); i += 3)
+		{
+			D3DXVECTOR3 vertex[3]{ mesh->GetVertexData(i).GetPosition(), mesh->GetVertexData(i + 1).GetPosition() , mesh->GetVertexData(i + 2).GetPosition() };
+			if (D3DXIntersectTri(vertex, vertex + 1, vertex + 2, &localStart, &localDir, nullptr, nullptr, &curDist))
+			{
+				if (minDist < 0 || minDist > curDist) minDist = curDist;
+			}
+		}
+
+		if (minDist >= 0)
+		{
+			if (dist)
+				*dist = minDist;
+			return true;
+		}
+	}
 	return false;
 }
 

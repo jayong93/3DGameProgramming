@@ -19,7 +19,7 @@ public:
 
 	void SetPos(const D3DXVECTOR3& pos) { mtxWorld._41 = pos.x; mtxWorld._42 = pos.y; mtxWorld._43 = pos.z; }
 	D3DXVECTOR3 GetPos() const { return D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43); }
-	bool RayCast(const D3DXVECTOR3& ray) const;
+	virtual bool CheckRayCast(D3DXVECTOR3 const& rayStart, D3DXVECTOR3 const& rayDir, float* dist = nullptr) const;
 
 	D3DXMATRIX mtxWorld;
 	CMesh* mesh;

@@ -125,3 +125,30 @@ void CScene::Render(ID3D11DeviceContext * deviceContext, CCamera* camera)
 	for (auto o : objectList)
 		o->Render(deviceContext);
 }
+
+bool CScene::CheckRayCast(D3DXVECTOR3 const & rayStart, D3DXVECTOR3 const& rayDir)
+{
+	float minDist{ -1 };
+	auto pickingObj{ objectList.end() };
+	for (auto it = objectList.begin() + 2; it != objectList.end(); ++it)
+	{
+		auto& o = *it;
+		float dist;
+		if (o->CheckRayCast(rayStart, rayDir, &dist))
+		{
+			if (minDist < 0 || minDist > dist)
+			{
+				minDist = dist;
+				pickingObj = it;
+			}
+		}
+	}
+
+	if (pickingObj != objectList.end())
+	{
+		objectList.erase(pickingObj);
+		return true;
+	}
+
+	return false;
+}

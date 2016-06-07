@@ -134,7 +134,7 @@ void CGameFramework::BuildObject()
 
 	cam->CreateProjectionMatrix(1.0, 500.0f, clientWidth / (float)clientHeight, 90.0f);
 
-	cam->SetPosition({ 0.0f,10.0f,-55.0f });
+	cam->SetPosition({ 0.0f,0.0f,-55.0f });
 	cam->CreateViewMatrix();
 
 	player->SetCamera(cam);
@@ -195,7 +195,25 @@ void CGameFramework::OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARA
 	case WM_RBUTTONDOWN:
 	{
 		// ÇÇÅ·
-		
+		float x = LOWORD(lParam), y = HIWORD(lParam);
+		D3DXVECTOR3 ray{ 320,240,1 };
+
+		CCamera* cam = player->GetCamera();
+		D3D11_VIEWPORT camView = cam->GetViewport();
+		D3D10_VIEWPORT view;
+		view.TopLeftX = camView.TopLeftX;
+		view.TopLeftY = camView.TopLeftY;
+		view.Width = camView.Width;
+		view.Height = camView.Height;
+		view.MinDepth = camView.MinDepth;
+		view.MaxDepth = camView.MaxDepth;
+
+		D3DXMATRIX idm;
+		D3DXMatrixIdentity(&idm);
+		D3DXVec3Unproject(&ray, &ray, &view, &cam->GetProjectionMatrix(), &cam->GetViewMatrix(), &idm);
+
+		D3DXVec3Normalize(&ray, &ray);
+		scene->CheckRayCast(cam->GetPosition(), ray);
 		break;
 	}
 	case WM_LBUTTONUP:
