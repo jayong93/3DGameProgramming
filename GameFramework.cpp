@@ -135,6 +135,51 @@ void CGameFramework::ReleaseObject()
 
 void CGameFramework::ProcessInput()
 {
+	bool processedByScene{ false };
+	if (scene) processedByScene = scene->ProcessInput();
+	if (!processedByScene)
+	{
+		static UCHAR keyBuffer[256];
+		DWORD direction = 0;
+		if (GetKeyboardState(keyBuffer))
+		{
+			if (keyBuffer[VK_UP] & 0xf0) direction |= FORWARD;
+			if (keyBuffer[VK_DOWN] & 0xf0) direction |= BACKWARD;
+			if (keyBuffer[VK_LEFT] & 0xf0) direction |= LEFT;
+			if (keyBuffer[VK_RIGHT] & 0xf0) direction |= RIGHT;
+			if (keyBuffer[VK_PRIOR] & 0xf0) direction |= UP;
+			if (keyBuffer[VK_NEXT] & 0xf0) direction |= DOWN;
+		}
+
+		float cx = 0.f, cy = 0.f;
+		POINT cursorPos;
+
+		if (GetCapture() == hWnd)
+		{
+			SetCursor(nullptr);
+
+			GetCursorPos(&cursorPos);
+
+			cx = (float)(cursorPos.x - oldCursorPos.x) / 3.f;
+			cy = (float)(cursorPos.y - oldCursorPos.y) / 3.f;
+			SetCursorPos(oldCursorPos.x, oldCursorPos.y);
+		}
+
+		if (direction != 0 || cx != 0.f || cy != 0.f)
+		{
+			if (cx || cy)
+			{
+				if (keyBuffer[VK_RBUTTON] & 0xf0)
+					player->Rotate(cy, 0.f, -cx);
+				else
+					player->Rotate(cy, cx, 0.f);
+			}
+
+			if (direction) player->Move(direction, 50.f*timer.GetTimeElapsed(), true);
+		}
+	}
+
+	player->Update(timer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObject()
@@ -154,6 +199,8 @@ void CGameFramework::FrameAdvance()
 	if (player) player->UpdateShaderVariables(d3dDeviceContext);
 	CCamera* cam = player ? player->GetCamera() : nullptr;
 	if (scene)scene->Render(d3dDeviceContext, cam);
+
+	if (player) player->Render(d3dDeviceContext);
 
 	dxgiSwapChain->Present(1, 0);
 

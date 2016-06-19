@@ -2,7 +2,7 @@
 #include "Mesh.h"
 
 
-CMesh::CMesh(D3D11_FILL_MODE type) : strideByte{ sizeof(CVertex) }, offset{ 0 }, reference{ 0 }, primitiveTopology{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST }, rasterizserState{ nullptr }, drawType{ type }, indexBuffer{ nullptr }, indexCnt{ 0 }, startIndex{ 0 }, baseVertex{ 0 }
+CMesh::CMesh(D3D11_FILL_MODE type) : strideByte{ sizeof(CVertex) }, offset{ 0 }, reference{ 1 }, primitiveTopology{ D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST }, rasterizserState{ nullptr }, drawType{ type }, indexBuffer{ nullptr }, indexCnt{ 0 }, startIndex{ 0 }, baseVertex{ 0 }
 {
 }
 
