@@ -68,7 +68,7 @@ public:
 class CCubeMesh : public CMesh
 {
 public:
-	CCubeMesh(ID3D11Device* device, D3D11_FILL_MODE type, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
+	CCubeMesh(ID3D11Device* device, D3D11_FILL_MODE type, D3DXCOLOR color, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
 	virtual ~CCubeMesh();
 
 	virtual void CreateRasterizerState(ID3D11Device* device);

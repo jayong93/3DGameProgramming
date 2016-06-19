@@ -43,5 +43,7 @@ private:
 
 	CPlayer* player;
 	ID3D11Buffer* cbColor;
+
+	POINT oldCursorPos;
 };
 

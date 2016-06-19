@@ -89,21 +89,21 @@ void CGameFramework::BuildObject()
 {
 	scene = new CScene;
 
-	player = new CPlayer;
+	player = new CCubePlayer{ d3dDevice };
+	CMesh* cubeMesh = new CCubeMesh{ d3dDevice,D3D11_FILL_WIREFRAME,{1.f,0.f,0.f,1.f} };
+	player->SetMesh(cubeMesh);
 
-	CCamera* cam = new CCamera;
-	cam->CreateShaderVariable(d3dDevice);
-	cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
+	CCamera* cam{ nullptr };
 
-	cam->CreateProjectionMatrix(1.0, 500.0f, clientWidth / (float)clientHeight, 90.0f);
-
-	D3DXVECTOR3 eyePos{ 0.0f,15.0f,-35.0f };
-	D3DXVECTOR3 lookAt{ 0.0f,0.0f,0.0f };
-	D3DXVECTOR3 up{ 0.0f,1.0f,0.0f };
-	cam->CreateViewMatrix(eyePos, lookAt, up);
-
-	player->SetCamera(cam);
 	player->CreateShaderVariables(d3dDevice);
+	player->ChangeCamera(d3dDevice, CameraMode::SPACESHIP, timer.GetTimeElapsed());
+
+	cam = player->GetCamera();
+	cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
+	cam->CreateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+	cam->CreateViewMatrix();
+
+	player->SetPosition(D3DXVECTOR3{ 0.f,10.f,-50.f });
 
 	if (scene) scene->BuildObject(d3dDevice);
 
@@ -168,9 +168,12 @@ void CGameFramework::OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARA
 	{
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+		SetCapture(hWnd);
+		GetCursorPos(&oldCursorPos);
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
+		ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
 		break;

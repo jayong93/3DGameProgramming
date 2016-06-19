@@ -26,7 +26,7 @@ void CScene::BuildObject(ID3D11Device * device)
 	CShader* shader{ new CShader };
 	shader->CreateShader(device);
 
-	CCubeMesh* mesh{ new CCubeMesh{device, D3D11_FILL_SOLID, 15.0f, 15.0f, 15.0f} };
+	CCubeMesh* mesh{ new CCubeMesh{device, D3D11_FILL_SOLID, {0.f,0.f,1.f,1.f}, 15.0f, 15.0f, 15.0f} };
 	CRotatingObject* obj{ new CRotatingObject };
 	obj->SetMesh(mesh);
 	obj->SetShader(shader);
