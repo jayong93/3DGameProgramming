@@ -27,14 +27,26 @@ void CScene::BuildObject(ID3D11Device * device)
 	shader->CreateShader(device);
 	shaderList.emplace_back(shader);
 
-	D3DXCOLOR cubeColor{ 1.f,0.7f,0.7f,1.f };
-	CCubeMesh* mesh{ new CCubeMesh{device, D3D11_FILL_SOLID, cubeColor, 15.0f, 15.0f, 15.0f} };
-	CRotatingObject* obj{ new CRotatingObject };
-	obj->SetMesh(mesh);
-	shader->objList.emplace_back(obj);
+	D3DXCOLOR cubeColor{ 1.f,0.4f,0.4f,1.f };
+	CCubeMesh* mesh{ new CCubeMesh{device, D3D11_FILL_SOLID, cubeColor, 0.5f, 0.5f, 0.5f} };
+	for (int i = 0; i < 80; i++)
+	{
+		CRotatingObject* obj{ new CRotatingObject };
+		obj->SetMesh(mesh);
+		obj->SetPosition({ RandomRangeFloat(-49.f,49.f),1.25f,RandomRangeFloat(-49.f,49.f) });
+		shader->objList.emplace_back(obj);
+		objectList.emplace_back(obj);
+		obj->AddRef();
+	}
 
-	objectList.emplace_back(obj);
-	obj->AddRef();
+	D3DXCOLOR floorColor{ 0.5f,0.5f,0.5f,1.f };
+	mesh = new CCubeMesh{ device, D3D11_FILL_SOLID, floorColor, 100.f,2.f,100.f };
+	CGameObject* floor{ new CGameObject };
+	floor->SetMesh(mesh);
+	shader->objList.emplace_back(floor);
+
+	objectList.emplace_back(floor);
+	floor->AddRef();
 }
 
 void CScene::ReleaseObject()
@@ -44,6 +56,8 @@ void CScene::ReleaseObject()
 		s->ReleaseObjects();
 		s->Release();
 	}
+	for (auto& o : objectList)
+		o->Release();
 }
 
 bool CScene::ProcessInput()

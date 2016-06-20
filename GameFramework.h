@@ -36,6 +36,8 @@ private:
 	IDXGISwapChain* dxgiSwapChain;
 	ID3D11DeviceContext* d3dDeviceContext;
 	ID3D11RenderTargetView* d3dRenderTargetView;
+	ID3D11Texture2D* depthStencilBuffer{ nullptr };
+	ID3D11DepthStencilView* depthStencilView{ nullptr };
 
 	CTimer timer;
 	TCHAR captionBuffer[50];

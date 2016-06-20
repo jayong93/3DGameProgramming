@@ -45,7 +45,28 @@ bool CGameFramework::CreateRenderTargetView()
 	if (FAILED(hResult = d3dDevice->CreateRenderTargetView(d3dBackBuffer, nullptr, &d3dRenderTargetView))) return false;
 	if (d3dBackBuffer) d3dBackBuffer->Release();
 
-	d3dDeviceContext->OMSetRenderTargets(1, &d3dRenderTargetView, nullptr);
+	D3D11_TEXTURE2D_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Width = clientWidth;
+	bd.Height = clientHeight;
+	bd.MipLevels = 1;
+	bd.ArraySize = 1;
+	bd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	bd.SampleDesc.Count = 1;
+	bd.SampleDesc.Quality = 0;
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	if (FAILED(hResult = d3dDevice->CreateTexture2D(&bd, nullptr, &depthStencilBuffer))) return false;
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC vd;
+	ZeroMemory(&vd, sizeof(vd));
+	vd.Format = bd.Format;
+	vd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	vd.Texture2D.MipSlice = 0;
+	if (FAILED(hResult = d3dDevice->CreateDepthStencilView(depthStencilBuffer, &vd, &depthStencilView))) return false;
+
+	d3dDeviceContext->OMSetRenderTargets(1, &d3dRenderTargetView, depthStencilView);
 
 	return(true);
 }
@@ -94,11 +115,12 @@ void CGameFramework::BuildObject()
 	CShader::CreateShaderVariables(d3dDevice);
 
 	playerShader = new CShader;
-	D3DXCOLOR cubeColor{ 0.7f,0.7f,1.f,1.f };
-	CMesh* mesh = new CCubeMesh{ d3dDevice,D3D11_FILL_WIREFRAME, cubeColor, 10.f,10.f,10.f };
+	D3DXCOLOR cubeColor{ 0.4f,0.4f,1.f,1.f };
+	CMesh* mesh = new CCubeMesh{ d3dDevice,D3D11_FILL_SOLID, cubeColor, 0.5f,0.5f,0.5f };
 	playerShader->CreateShader(d3dDevice);
 	playerShader->objList.emplace_back(player);
 	player->SetMesh(mesh);
+	player->SetPosition({ 0.f, 1.25f, 0.f });
 
 	CCamera* cam = new ThirdCam;
 	cam->CreateShaderVariable(d3dDevice);
@@ -177,7 +199,7 @@ void CGameFramework::ProcessInput()
 					player->GetCamera()->Rotate(cy, cx, 0.f);
 			}
 
-			if (direction) player->Move(direction, 50.f*timer.GetTimeElapsed());
+			if (direction) player->Move(direction, 5.f*timer.GetTimeElapsed());
 		}
 	}
 
@@ -196,7 +218,10 @@ void CGameFramework::FrameAdvance()
 	AnimateObject();
 
 	float fClearColor[4] = { 1.f, 1.f, 1.0f, 1.0f };
-	d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
+	if (d3dRenderTargetView)
+		d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
+	if (depthStencilView)
+		d3dDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	if (player) player->UpdateShaderVariables(d3dDeviceContext);
 	CCamera* cam = player ? player->GetCamera() : nullptr;
@@ -268,6 +293,8 @@ LRESULT CGameFramework::OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LP
 		d3dDeviceContext->OMSetRenderTargets(0, NULL, NULL);
 
 		if (d3dRenderTargetView) d3dRenderTargetView->Release();
+		if (depthStencilBuffer) depthStencilBuffer->Release();
+		if (depthStencilView) depthStencilView->Release();
 
 		dxgiSwapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 

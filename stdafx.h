@@ -41,3 +41,6 @@ Value MinMax(Value low, Value val, Value high)
 {
 	return min(max(low, val), high);
 }
+
+inline float RandomNormalizeFloat() { return (float)(rand() / (float)RAND_MAX); }
+inline float RandomRangeFloat(float min, float max) { return (RandomNormalizeFloat()*(max - min) + min); }

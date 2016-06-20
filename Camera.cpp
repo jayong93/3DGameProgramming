@@ -62,7 +62,7 @@ void CCamera::UpdateShaderVariable(ID3D11DeviceContext * deviceContext)
 
 ThirdCam::ThirdCam()
 {
-	offset = D3DXVECTOR3{ 0.f,10.f,-50.f };
+	offset = D3DXVECTOR3{ 0.f,2.f,-5.f };
 	lookAt = D3DXVECTOR3{ 0.f,-5.f,10.f };
 }
 
