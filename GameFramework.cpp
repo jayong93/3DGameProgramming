@@ -97,10 +97,9 @@ void CGameFramework::BuildObject()
 
 	cam->CreateProjectionMatrix(1.0, 500.0f, clientWidth / (float)clientHeight, 90.0f);
 
-	D3DXVECTOR3 eyePos{ 0.0f,15.0f,-35.0f };
-	D3DXVECTOR3 lookAt{ 0.0f,0.0f,0.0f };
-	D3DXVECTOR3 up{ 0.0f,1.0f,0.0f };
-	cam->CreateViewMatrix(eyePos, lookAt, up);
+	cam->SetPosition({ 0.0f,15.0f,-55.0f });
+	cam->SetLookAt({ 0.0f,0.0f,0.0f });
+	cam->CreateViewMatrix();
 
 	player->SetCamera(cam);
 	player->CreateShaderVariables(d3dDevice);

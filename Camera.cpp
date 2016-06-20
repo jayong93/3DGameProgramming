@@ -27,9 +27,9 @@ void CCamera::SetViewport(ID3D11DeviceContext * deviceContext, DWORD xStart, DWO
 	deviceContext->RSSetViewports(1, &viewport);
 }
 
-void CCamera::CreateViewMatrix(D3DXVECTOR3 eyePos, D3DXVECTOR3 lookAt, D3DXVECTOR3 up)
+void CCamera::CreateViewMatrix()
 {
-	D3DXMatrixLookAtLH(&mtxView, &eyePos, &lookAt, &up);
+	D3DXMatrixLookAtLH(&mtxView, &position, &lookAt, &up);
 }
 
 void CCamera::CreateProjectionMatrix(float nearDist, float farDist, float aspect, float fov)
@@ -58,4 +58,15 @@ void CCamera::UpdateShaderVariable(ID3D11DeviceContext * deviceContext)
 	D3DXMatrixTranspose(&viewProjection->mtxProjection, &mtxProjection);
 	deviceContext->Unmap(cbCamera, 0);
 	deviceContext->VSSetConstantBuffers(VS_SLOT_CAMERA, 1, &cbCamera);
+}
+
+void ThirdCam::SetPlayer(CPlayer * p)
+{
+	CCamera::SetPlayer(p);
+
+	position = p->GetPosition() + offset;
+}
+
+void ThirdCam::UpdateViewMatrix()
+{
 }

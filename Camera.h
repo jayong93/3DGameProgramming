@@ -14,19 +14,36 @@ public:
 	CCamera();
 	virtual ~CCamera();
 
-	void SetPlayer(CPlayer* p) { player = p; }
+	virtual void SetPlayer(CPlayer* p) { player = p; }
 
 	void SetViewport(ID3D11DeviceContext* deviceContext, DWORD xStart, DWORD yStart, DWORD width, DWORD height, float minZ = 0.0f, float maxZ = 1.0f);
 
-	void CreateViewMatrix(D3DXVECTOR3 eyePos, D3DXVECTOR3 lookAt, D3DXVECTOR3 up);
+	void CreateViewMatrix();
+	virtual void UpdateViewMatrix() {}
 	void CreateProjectionMatrix(float nearDist, float farDist, float aspect, float fov);
-	
+
 	void CreateShaderVariable(ID3D11Device* device);
 	void UpdateShaderVariable(ID3D11DeviceContext* deviceContext);
+
+	void SetPosition(const D3DXVECTOR3& pos) { position = pos; }
+	const D3DXVECTOR3& GetPosition() const { return position; }
+
+	void SetLookAt(const D3DXVECTOR3& look) { lookAt = look; }
+	const D3DXVECTOR3& GetLookAt() const { return lookAt; }
+
+	void SetUp(const D3DXVECTOR3& up) { this->up = up; }
+	const D3DXVECTOR3& GetUp() const { return up; }
+
+	virtual void Rotate(float x, float y, float z);
+	virtual void Rotate(const D3DXVECTOR3& axis, float angle);
 
 protected:
 	D3DXMATRIX mtxView;
 	D3DXMATRIX mtxProjection;
+
+	D3DXVECTOR3 position{ 0.f,0.f,0.f };
+	D3DXVECTOR3 lookAt{ 0.f,0.f,0.f };
+	D3DXVECTOR3 up{ 0.f,1.f,0.f };
 
 	D3D11_VIEWPORT viewport;
 
@@ -35,3 +52,16 @@ protected:
 	CPlayer* player;
 };
 
+class ThirdCam : public CCamera
+{
+public:
+	virtual void SetPlayer(CPlayer* p);
+	virtual void UpdateViewMatrix();
+
+	void SetOffset(const D3DXVECTOR3& o) { offset = o; }
+	const D3DXVECTOR3& GetOffset() const { return offset; }
+
+protected:
+	D3DXVECTOR3 offset{ 0.f,10.f,-50.f };
+	float yAngle;
+};
