@@ -60,6 +60,12 @@ void CCamera::UpdateShaderVariable(ID3D11DeviceContext * deviceContext)
 	deviceContext->VSSetConstantBuffers(VS_SLOT_CAMERA, 1, &cbCamera);
 }
 
+ThirdCam::ThirdCam()
+{
+	offset = D3DXVECTOR3{ 0.f,10.f,-50.f };
+	lookAt = D3DXVECTOR3{ 0.f,-5.f,10.f };
+}
+
 void ThirdCam::SetPlayer(CPlayer * p)
 {
 	CCamera::SetPlayer(p);
@@ -67,6 +73,32 @@ void ThirdCam::SetPlayer(CPlayer * p)
 	position = p->GetPosition() + offset;
 }
 
+void ThirdCam::CreateViewMatrix()
+{
+	auto lookAtAps = position + lookAt;
+	D3DXMatrixLookAtLH(&mtxView, &position, &lookAtAps, &up);
+}
+
 void ThirdCam::UpdateViewMatrix()
 {
+	position = player->GetPosition() + offset;
+	auto lookAtAps = position + lookAt;
+
+	D3DXMatrixLookAtLH(&mtxView, &position, &lookAtAps, &up);
+}
+
+void ThirdCam::Rotate(float x, float y, float z)
+{
+	D3DXVECTOR3 forward{ 0.f,0.f,1.f };
+	float angle = D3DXToDegree(max(min(acosf(D3DXVec3Dot(&forward, &lookAt)), 1), 0));
+	if (lookAt.y < 0) angle = -angle;
+
+	if (abs(angle) >= 89.f) return;
+
+	if (angle + x < -89.f) x = -89.f - angle;
+	else if (angle + x > 89.f) x = 89.f - angle;
+
+	D3DXMATRIX rm;
+	D3DXMatrixRotationX(&rm, D3DXToRadian(x));
+	D3DXVec3TransformCoord(&lookAt, &lookAt, &rm);
 }

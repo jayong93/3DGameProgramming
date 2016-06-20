@@ -18,7 +18,7 @@ public:
 
 	void SetViewport(ID3D11DeviceContext* deviceContext, DWORD xStart, DWORD yStart, DWORD width, DWORD height, float minZ = 0.0f, float maxZ = 1.0f);
 
-	void CreateViewMatrix();
+	virtual void CreateViewMatrix();
 	virtual void UpdateViewMatrix() {}
 	void CreateProjectionMatrix(float nearDist, float farDist, float aspect, float fov);
 
@@ -34,8 +34,7 @@ public:
 	void SetUp(const D3DXVECTOR3& up) { this->up = up; }
 	const D3DXVECTOR3& GetUp() const { return up; }
 
-	virtual void Rotate(float x, float y, float z);
-	virtual void Rotate(const D3DXVECTOR3& axis, float angle);
+	virtual void Rotate(float x, float y, float z) {}
 
 protected:
 	D3DXMATRIX mtxView;
@@ -44,6 +43,7 @@ protected:
 	D3DXVECTOR3 position{ 0.f,0.f,0.f };
 	D3DXVECTOR3 lookAt{ 0.f,0.f,0.f };
 	D3DXVECTOR3 up{ 0.f,1.f,0.f };
+	D3DXVECTOR3 offset{ 0.f,0.f,0.f };
 
 	D3D11_VIEWPORT viewport;
 
@@ -55,13 +55,12 @@ protected:
 class ThirdCam : public CCamera
 {
 public:
+	ThirdCam();
+	virtual ~ThirdCam() {}
+
 	virtual void SetPlayer(CPlayer* p);
+	virtual void CreateViewMatrix();
 	virtual void UpdateViewMatrix();
 
-	void SetOffset(const D3DXVECTOR3& o) { offset = o; }
-	const D3DXVECTOR3& GetOffset() const { return offset; }
-
-protected:
-	D3DXVECTOR3 offset{ 0.f,10.f,-50.f };
-	float yAngle;
+	virtual void Rotate(float x, float y, float z);
 };

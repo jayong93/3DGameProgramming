@@ -91,14 +91,12 @@ void CGameFramework::BuildObject()
 
 	player = new CPlayer;
 
-	CCamera* cam = new CCamera;
+	CCamera* cam = new ThirdCam;
 	cam->CreateShaderVariable(d3dDevice);
 	cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
 
 	cam->CreateProjectionMatrix(1.0, 500.0f, clientWidth / (float)clientHeight, 90.0f);
-
-	cam->SetPosition({ 0.0f,15.0f,-55.0f });
-	cam->SetLookAt({ 0.0f,0.0f,0.0f });
+	cam->SetPlayer(player);
 	cam->CreateViewMatrix();
 
 	player->SetCamera(cam);
