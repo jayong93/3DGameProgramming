@@ -71,40 +71,44 @@ void ThirdCam::SetPlayer(CPlayer * p)
 	CCamera::SetPlayer(p);
 
 	position = p->GetPosition() + offset;
+	lookAt = p->GetPosition();
 }
 
 void ThirdCam::CreateViewMatrix()
 {
-	auto lookAtAps = position + lookAt;
-	D3DXMatrixLookAtLH(&mtxView, &position, &lookAtAps, &up);
+	D3DXMATRIX rm;
+	D3DXVECTOR3 rotatedOffset;
+	D3DXMatrixRotationX(&rm, D3DXToRadian(xAngle));
+	D3DXVec3TransformCoord(&rotatedOffset, &offset, &rm);
+	D3DXMatrixRotationY(&rm, D3DXToRadian(yAngle));
+	D3DXVec3TransformCoord(&rotatedOffset, &rotatedOffset, &rm);
+
+	position = player->GetPosition() + rotatedOffset;
+	lookAt = player->GetPosition();
+	D3DXMatrixLookAtLH(&mtxView, &position, &lookAt, &up);
 }
 
 void ThirdCam::UpdateViewMatrix()
 {
-	position = player->GetPosition() + offset;
+	D3DXMATRIX rm;
+	D3DXVECTOR3 rotatedOffset;
+	D3DXMatrixRotationX(&rm, D3DXToRadian(xAngle));
+	D3DXVec3TransformCoord(&rotatedOffset, &offset, &rm);
+	D3DXMatrixRotationY(&rm, D3DXToRadian(yAngle));
+	D3DXVec3TransformCoord(&rotatedOffset, &rotatedOffset, &rm);
 
-	auto lookAtAps = position + lookAt;
-
-	D3DXMatrixLookAtLH(&mtxView, &position, &lookAtAps, &up);
+	position = player->GetPosition() + rotatedOffset;
+	lookAt = player->GetPosition();
+	D3DXMatrixLookAtLH(&mtxView, &position, &lookAt, &up);
 }
 
 void ThirdCam::Rotate(float x, float y, float z)
 {
-	D3DXVECTOR3 xla{ lookAt }, forward{ 0.f,0.f,1.f };
-	xla.x = 0;
-	D3DXVec3Normalize(&xla, &xla);
-
-	float xDelta = D3DXToDegree(acosf(MinMax(0.f, D3DXVec3Dot(&xla, &forward), 1.f)));
-	xDelta = xla.y < 0 ? -xDelta : xDelta;
-
-	D3DXMATRIX rm;
-	if (xDelta + x > -60.f && xDelta + x < 10.f)
-	{
-		D3DXMatrixRotationX(&rm, D3DXToRadian(x));
-		D3DXVec3TransformCoord(&lookAt, &lookAt, &rm);
-	}
-	D3DXMatrixRotationY(&rm, D3DXToRadian(y));
-	D3DXVec3TransformCoord(&lookAt, &lookAt, &rm);
+	xAngle += x;
+	yAngle += y;
+	xAngle = MinMax(-10.f, xAngle, 60.f);
+	if (yAngle > 360) yAngle -= 360;
+	else if (yAngle < 0) yAngle += 360;
 
 	this->UpdateViewMatrix();
 }

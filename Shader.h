@@ -30,7 +30,7 @@ public:
 	ID3D11InputLayout *vertexLayout;
 	ID3D11PixelShader *pixelShader;
 	
-private:
+protected:
 	int reference;
 
 	ID3D11Buffer* cbMtxWorld;

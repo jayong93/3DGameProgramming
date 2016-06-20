@@ -91,6 +91,13 @@ void CGameFramework::BuildObject()
 
 	player = new CPlayer;
 
+	CShader* shader = new CShader;
+	D3DXCOLOR cubeColor{ 0.7f,0.7f,1.f,1.f };
+	CMesh* mesh = new CCubeMesh{ d3dDevice,D3D11_FILL_WIREFRAME, cubeColor, 10.f,10.f,10.f };
+	shader->CreateShader(d3dDevice);
+	player->SetShader(shader);
+	player->SetMesh(mesh);
+
 	CCamera* cam = new ThirdCam;
 	cam->CreateShaderVariable(d3dDevice);
 	cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
@@ -137,15 +144,14 @@ void CGameFramework::ProcessInput()
 	if (!processedByScene)
 	{
 		static UCHAR keyBuffer[256];
-		GetKeyboardState(keyBuffer);
-		//{
-		//	if (keyBuffer[VK_UP] & 0xf0) direction |= FORWARD;
-		//	if (keyBuffer[VK_DOWN] & 0xf0) direction |= BACKWARD;
-		//	if (keyBuffer[VK_LEFT] & 0xf0) direction |= LEFT;
-		//	if (keyBuffer[VK_RIGHT] & 0xf0) direction |= RIGHT;
-		//	if (keyBuffer[VK_PRIOR] & 0xf0) direction |= UP;
-		//	if (keyBuffer[VK_NEXT] & 0xf0) direction |= DOWN;
-		//}
+		DWORD direction{ 0 };
+		if (GetKeyboardState(keyBuffer))
+		{
+			if (keyBuffer['W'] & 0xf0) direction |= FORWARD;
+			if (keyBuffer['S'] & 0xf0) direction |= BACKWARD;
+			if (keyBuffer['A'] & 0xf0) direction |= LEFT;
+			if (keyBuffer['D'] & 0xf0) direction |= RIGHT;
+		}
 
 		float cx = 0.f, cy = 0.f;
 		POINT cursorPos;
@@ -161,17 +167,15 @@ void CGameFramework::ProcessInput()
 			SetCursorPos(oldCursorPos.x, oldCursorPos.y);
 		}
 
-		if (cx != 0.f || cy != 0.f)
+		if (direction != 0 || cx != 0.f || cy != 0.f)
 		{
 			if (cx || cy)
 			{
 				if (keyBuffer[VK_RBUTTON] & 0xf0)
 					player->GetCamera()->Rotate(cy, cx, 0.f);
-				//else
-				//	player->Rotate(cy, cx, 0.f);
 			}
 
-			//if (direction) player->Move(direction, 50.f*timer.GetTimeElapsed(), true);
+			if (direction) player->Move(direction, 50.f*timer.GetTimeElapsed());
 		}
 	}
 
@@ -195,6 +199,7 @@ void CGameFramework::FrameAdvance()
 	if (player) player->UpdateShaderVariables(d3dDeviceContext);
 	CCamera* cam = player ? player->GetCamera() : nullptr;
 	if (scene)scene->Render(d3dDeviceContext, cam);
+	if (player) player->Render(d3dDeviceContext);
 
 	dxgiSwapChain->Present(1, 0);
 
@@ -237,7 +242,7 @@ void CGameFramework::OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 		case VK_F2:
 		case VK_F3:
 		{
-			
+
 			break;
 		}
 		default:

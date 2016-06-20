@@ -89,7 +89,7 @@ void CTriangleMesh::CreateRasterizerState(ID3D11Device * device)
 	device->CreateRasterizerState(&rd, &rasterizserState);
 }
 
-CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, float width, float height, float depth) : CMesh(type)
+CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, D3DXCOLOR color, float width, float height, float depth) : CMesh(type)
 {
 	vertexCnt = 8;
 	strideByte = sizeof(CDiffusedVertex);
@@ -102,14 +102,14 @@ CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, float width, f
 	int i = 0;
 
 	//정점 버퍼 데이터는 삼각형 리스트이므로 36개의 정점 데이터를 준비한다.
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), RANDOM_COLOR());
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), RANDOM_COLOR());
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), color);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), color);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), color);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), color);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), color);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), color);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), color);
+	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), color);
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));

@@ -63,4 +63,7 @@ public:
 	virtual void UpdateViewMatrix();
 
 	virtual void Rotate(float x, float y, float z);
+
+protected:
+	float xAngle{ 0.f }, yAngle{ 0.f };
 };

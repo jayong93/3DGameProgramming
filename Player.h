@@ -2,6 +2,13 @@
 #include "Object.h"
 #include "Camera.h"
 
+#define FORWARD 0x01
+#define BACKWARD 0x02
+#define LEFT 0x04
+#define RIGHT 0x08
+#define UP 0x10
+#define DOWN 0x20
+
 class CPlayer : public CGameObject
 {
 public:
@@ -15,6 +22,10 @@ public:
 	void UpdateShaderVariables(ID3D11DeviceContext* deviceContext);
 
 	void Update(float timeElapsed) { if (camera) camera->UpdateViewMatrix(); }
+
+	void Move(float x, float y, float z);
+	void Move(D3DXVECTOR3 const& shift);
+	void Move(DWORD dir, float speed);
 
 protected:
 	CCamera* camera;
