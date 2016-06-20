@@ -14,6 +14,8 @@ public:
 	void CreateShaderVariables(ID3D11Device* device);
 	void UpdateShaderVariables(ID3D11DeviceContext* deviceContext);
 
+	void Update(float timeElapsed) { if (camera) camera->UpdateViewMatrix(); }
+
 protected:
 	CCamera* camera;
 };

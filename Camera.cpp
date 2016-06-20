@@ -82,6 +82,7 @@ void ThirdCam::CreateViewMatrix()
 void ThirdCam::UpdateViewMatrix()
 {
 	position = player->GetPosition() + offset;
+
 	auto lookAtAps = position + lookAt;
 
 	D3DXMatrixLookAtLH(&mtxView, &position, &lookAtAps, &up);
@@ -89,16 +90,21 @@ void ThirdCam::UpdateViewMatrix()
 
 void ThirdCam::Rotate(float x, float y, float z)
 {
-	D3DXVECTOR3 forward{ 0.f,0.f,1.f };
-	float angle = D3DXToDegree(max(min(acosf(D3DXVec3Dot(&forward, &lookAt)), 1), 0));
-	if (lookAt.y < 0) angle = -angle;
+	D3DXVECTOR3 xla{ lookAt }, forward{ 0.f,0.f,1.f };
+	xla.x = 0;
+	D3DXVec3Normalize(&xla, &xla);
 
-	if (abs(angle) >= 89.f) return;
-
-	if (angle + x < -89.f) x = -89.f - angle;
-	else if (angle + x > 89.f) x = 89.f - angle;
+	float xDelta = D3DXToDegree(acosf(MinMax(0.f, D3DXVec3Dot(&xla, &forward), 1.f)));
+	xDelta = xla.y < 0 ? -xDelta : xDelta;
 
 	D3DXMATRIX rm;
-	D3DXMatrixRotationX(&rm, D3DXToRadian(x));
+	if (xDelta + x > -60.f && xDelta + x < 10.f)
+	{
+		D3DXMatrixRotationX(&rm, D3DXToRadian(x));
+		D3DXVec3TransformCoord(&lookAt, &lookAt, &rm);
+	}
+	D3DXMatrixRotationY(&rm, D3DXToRadian(y));
 	D3DXVec3TransformCoord(&lookAt, &lookAt, &rm);
+
+	this->UpdateViewMatrix();
 }

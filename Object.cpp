@@ -2,7 +2,7 @@
 #include "Object.h"
 
 
-CGameObject::CGameObject() : mesh{ nullptr }, shader{ nullptr }, reference{ 0 }
+CGameObject::CGameObject() : mesh{ nullptr }, shader{ nullptr }, reference{ 1 }
 {
 	D3DXMatrixIdentity(&mtxWorld);
 }

@@ -34,3 +34,9 @@ const int VS_SLOT_CAMERA{ 0x00 };
 const int VS_SLOT_WORLD_MATRIX{ 0x01 };
 
 const int PS_SLOT_COLOR{ 0x00 };
+
+template <class Value>
+Value MinMax(Value low, Value val, Value high)
+{
+	return min(max(low, val), high);
+}
