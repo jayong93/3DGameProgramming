@@ -91,11 +91,13 @@ void CGameFramework::BuildObject()
 
 	player = new CPlayer;
 
-	CShader* shader = new CShader;
+	CShader::CreateShaderVariables(d3dDevice);
+
+	playerShader = new CShader;
 	D3DXCOLOR cubeColor{ 0.7f,0.7f,1.f,1.f };
 	CMesh* mesh = new CCubeMesh{ d3dDevice,D3D11_FILL_WIREFRAME, cubeColor, 10.f,10.f,10.f };
-	shader->CreateShader(d3dDevice);
-	player->SetShader(shader);
+	playerShader->CreateShader(d3dDevice);
+	playerShader->objList.emplace_back(player);
 	player->SetMesh(mesh);
 
 	CCamera* cam = new ThirdCam;
@@ -193,13 +195,13 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 	AnimateObject();
 
-	float fClearColor[4] = { 0.75f, 0.75f, 1.0f, 1.0f };
+	float fClearColor[4] = { 1.f, 1.f, 1.0f, 1.0f };
 	d3dDeviceContext->ClearRenderTargetView(d3dRenderTargetView, fClearColor);
 
 	if (player) player->UpdateShaderVariables(d3dDeviceContext);
 	CCamera* cam = player ? player->GetCamera() : nullptr;
 	if (scene)scene->Render(d3dDeviceContext, cam);
-	if (player) player->Render(d3dDeviceContext);
+	if (playerShader) playerShader->Render(d3dDeviceContext);
 
 	dxgiSwapChain->Present(1, 0);
 

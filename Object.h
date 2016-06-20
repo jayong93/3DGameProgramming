@@ -1,6 +1,5 @@
 #pragma once
 #include "Mesh.h"
-#include "Shader.h"
 #include "Camera.h"
 
 class CGameObject
@@ -13,7 +12,6 @@ public:
 	void Release() { if (--reference < 0) delete this; }
 
 	virtual void SetMesh(CMesh* m);
-	virtual void SetShader(CShader* s);
 	virtual void Animate(float deltaTime);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 
@@ -22,7 +20,6 @@ public:
 
 	D3DXMATRIX mtxWorld;
 	CMesh* mesh;
-	CShader* shader;
 private:
 	int reference;
 };

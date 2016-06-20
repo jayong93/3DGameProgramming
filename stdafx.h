@@ -24,6 +24,7 @@
 #include <D3Dcompiler.h>
 #include <D3DX10math.h>
 #include <chrono>
+#include <vector>
 #include <stdio.h>
 #include <time.h>
 

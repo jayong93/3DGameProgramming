@@ -1,6 +1,5 @@
 #pragma once
-#include "Object.h"
-#include <vector>
+#include "Shader.h"
 
 class CScene
 {
@@ -19,6 +18,7 @@ public:
 	void Render(ID3D11DeviceContext* deviceContext, CCamera* camera);
 
 private:
+	std::vector<CShader*> shaderList;
 	std::vector<CGameObject*> objectList;
 };
 

@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "Shader.h"
 #include "Object.h"
 
 
-CGameObject::CGameObject() : mesh{ nullptr }, shader{ nullptr }, reference{ 1 }
+CGameObject::CGameObject() : mesh{ nullptr }, reference{ 1 }
 {
 	D3DXMatrixIdentity(&mtxWorld);
 }
@@ -11,7 +12,6 @@ CGameObject::CGameObject() : mesh{ nullptr }, shader{ nullptr }, reference{ 1 }
 CGameObject::~CGameObject()
 {
 	if (mesh) mesh->Release();
-	if (shader) shader->Release();
 }
 
 void CGameObject::SetMesh(CMesh * m)
@@ -21,24 +21,13 @@ void CGameObject::SetMesh(CMesh * m)
 	if (mesh) mesh->AddRef();
 }
 
-void CGameObject::SetShader(CShader* s)
-{
-	if (shader) shader->Release();
-	shader = s;
-	if (shader) shader->AddRef();
-}
-
 void CGameObject::Animate(float deltaTime)
 {
 }
 
 void CGameObject::Render(ID3D11DeviceContext * deviceContext)
 {
-	if (shader)
-	{
-		shader->UpdateShaderVariable(deviceContext, &mtxWorld);
-		shader->Render(deviceContext);
-	}
+	CShader::UpdateShaderVariable(deviceContext, &mtxWorld);
 	if (mesh) mesh->Render(deviceContext);
 }
 

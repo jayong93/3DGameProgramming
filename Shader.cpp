@@ -15,10 +15,11 @@ BYTE* ReadCompiledEffectFile(LPCTSTR fileName, int* readBytes)
 	return byteCode;
 }
 
-CShader::CShader() : vertexShader{ nullptr }, pixelShader{ nullptr }, vertexLayout{ nullptr }, reference{ 0 }, cbMtxWorld{ nullptr }
+CShader::CShader() : vertexShader{ nullptr }, pixelShader{ nullptr }, vertexLayout{ nullptr }, reference{ 1 }
 {
 }
 
+ID3D11Buffer* CShader::cbMtxWorld = nullptr;
 
 CShader::~CShader()
 {
@@ -87,14 +88,6 @@ void CShader::CreateShader(ID3D11Device * device)
 	UINT elementCnt = ARRAYSIZE(inLayout);
 	CreateVertexShaderFromCompiledFile(device, TEXT("VS.fxo"), inLayout, elementCnt);
 	CreatePixelShaderFromCompiledFile(device, TEXT("PS.fxo"));
-	CreateShaderVariables(device);
-}
-
-void CShader::Render(ID3D11DeviceContext * deviceContext)
-{
-	if (vertexLayout) deviceContext->IASetInputLayout(vertexLayout);
-	if (vertexShader) deviceContext->VSSetShader(vertexShader, nullptr, 0);
-	if (pixelShader) deviceContext->PSSetShader(pixelShader, nullptr, 0);
 }
 
 void CShader::CreateShaderVariables(ID3D11Device * device)
@@ -122,4 +115,33 @@ void CShader::UpdateShaderVariable(ID3D11DeviceContext * deviceContext, D3DXMATR
 	deviceContext->Unmap(cbMtxWorld, 0);
 
 	deviceContext->VSSetConstantBuffers(VS_SLOT_WORLD_MATRIX, 1, &cbMtxWorld);
+}
+
+void CShader::ReleaseObjects()
+{
+	for (auto& o : objList)
+		o->Release();
+}
+
+void CShader::AnimateObjects(float timeElapsed)
+{
+	for (auto& o : objList)
+		o->Animate(timeElapsed);
+}
+
+void CShader::OnPrepareRender(ID3D11DeviceContext * deviceContext)
+{
+	if (vertexLayout) deviceContext->IASetInputLayout(vertexLayout);
+	if (vertexShader) deviceContext->VSSetShader(vertexShader, nullptr, 0);
+	if (pixelShader) deviceContext->PSSetShader(pixelShader, nullptr, 0);
+}
+
+void CShader::Render(ID3D11DeviceContext * deviceContext, CCamera * camera)
+{
+	OnPrepareRender(deviceContext);
+
+	for (auto& o : objList)
+	{
+		o->Render(deviceContext);
+	}
 }

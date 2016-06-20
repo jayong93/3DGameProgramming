@@ -1,4 +1,7 @@
 #pragma once
+#include "Object.h"
+#include "Camera.h"
+#include "Player.h"
 
 struct VS_CB_WORLD_MATRIX
 {
@@ -21,19 +24,25 @@ public:
 	void CreatePixelShaderFromCompiledFile(ID3D11Device* device, TCHAR* fileName);
 
 	virtual void CreateShader(ID3D11Device* device);
-	virtual void Render(ID3D11DeviceContext* deviceContext);
-	virtual void CreateShaderVariables(ID3D11Device* device);
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariable(ID3D11DeviceContext* deviceContext, D3DXMATRIX* mWorld);
+	static void CreateShaderVariables(ID3D11Device* device);
+	static void ReleaseShaderVariables();
+	static void UpdateShaderVariable(ID3D11DeviceContext* deviceContext, D3DXMATRIX* mWorld);
+
+	virtual void BuildObjects(ID3D11Device* device) {}
+	virtual void ReleaseObjects();
+	virtual void AnimateObjects(float timeElapsed);
+	virtual void OnPrepareRender(ID3D11DeviceContext* deviceContext);
+	virtual void Render(ID3D11DeviceContext *deviceContext, CCamera *camera = NULL);
 
 	ID3D11VertexShader *vertexShader;
 	ID3D11InputLayout *vertexLayout;
 	ID3D11PixelShader *pixelShader;
+	std::vector<CGameObject*> objList;
 	
 protected:
 	int reference;
 
-	ID3D11Buffer* cbMtxWorld;
+	static ID3D11Buffer* cbMtxWorld;
 };
 
 

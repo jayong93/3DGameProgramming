@@ -41,6 +41,7 @@ private:
 	TCHAR captionBuffer[50];
 	CScene* scene;
 
+	CShader* playerShader{ nullptr };
 	CPlayer* player;
 	ID3D11Buffer* cbColor;
 
