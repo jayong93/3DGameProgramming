@@ -89,9 +89,13 @@ void CGameFramework::BuildObject()
 {
 	scene = new CScene;
 
+	CShader* shader{ new CShader };
+	shader->CreateShader(d3dDevice);
+
 	player = new CCubePlayer{ d3dDevice };
 	CMesh* cubeMesh = new CCubeMesh{ d3dDevice,D3D11_FILL_WIREFRAME,{1.f,0.f,0.f,1.f} };
 	player->SetMesh(cubeMesh);
+	player->SetShader(shader);
 
 	CCamera* cam{ nullptr };
 
@@ -103,7 +107,7 @@ void CGameFramework::BuildObject()
 	cam->CreateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 	cam->CreateViewMatrix();
 
-	player->SetPosition(D3DXVECTOR3{ 0.f,10.f,-50.f });
+	player->SetPosition(D3DXVECTOR3{ 0.f,0.f,100.f });
 
 	if (scene) scene->BuildObject(d3dDevice);
 
@@ -170,9 +174,9 @@ void CGameFramework::ProcessInput()
 			if (cx || cy)
 			{
 				if (keyBuffer[VK_RBUTTON] & 0xf0)
-					player->Rotate(cy, 0.f, -cx);
-				else
 					player->Rotate(cy, cx, 0.f);
+				//else
+				//	player->Rotate(cy, cx, 0.f);
 			}
 
 			if (direction) player->Move(direction, 50.f*timer.GetTimeElapsed(), true);
@@ -243,12 +247,7 @@ void CGameFramework::OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM 
 		case VK_F2:
 		case VK_F3:
 		{
-			D3DXCOLOR newColor = (wParam == VK_F1) ? D3DXCOLOR{ 1.0f, 0.0f, 0.0f, 1.0f } : ((wParam == VK_F2) ? D3DXCOLOR{ 0.0f,1.0f,0.0f,1.0f } : D3DXCOLOR{ 0.0f,0.0f,1.0f,1.0f });
-			D3D11_MAPPED_SUBRESOURCE mapRes;
-			d3dDeviceContext->Map(cbColor, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapRes);
-			D3DXCOLOR* color = (D3DXCOLOR*)mapRes.pData;
-			*color = newColor;
-			d3dDeviceContext->Unmap(cbColor, 0);
+			if (player) player->ChangeCamera(d3dDevice, (CameraMode)(wParam - VK_F1 + 1), timer.GetTimeElapsed());
 			break;
 		}
 		default:

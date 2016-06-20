@@ -27,8 +27,8 @@ CCamera::CCamera(CCamera* cam) : player(nullptr), cbCamera{ nullptr }
 	{
 		position = D3DXVECTOR3{ 0.f,0.f,0.f };
 		right = D3DXVECTOR3{ 1.f,0.f,0.f };
-		look = D3DXVECTOR3{ 0.f,1.f,0.f };
-		up = D3DXVECTOR3{ 0.f,0.f,1.f };
+		up = D3DXVECTOR3{ 0.f,1.f,0.f };
+		look = D3DXVECTOR3{ 0.f,0.f,1.f };
 		pitch = 0.f;
 		yaw = 0.f;
 		roll = 0.f;
