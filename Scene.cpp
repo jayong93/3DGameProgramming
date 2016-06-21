@@ -23,12 +23,12 @@ bool CScene::OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 void CScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext* deviceContext)
 {
-	
+
 }
 
 void CScene::ReleaseObject()
 {
-	
+
 }
 
 bool CScene::ProcessInput(const InputData& inputData, float elapsedTime)
@@ -60,7 +60,8 @@ void FirstScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * device
 	// 플레이어 생성
 	player = new CPlayer;
 	XMVECTOR playerColor = XMVectorSet(0.4f, 0.4f, 1.f, 1.f);
-	CMesh* playerMesh = new CCubeMesh{ device,D3D11_FILL_SOLID, playerColor, 0.5f,0.5f,0.5f };
+	//CMesh* playerMesh = new CCubeMesh{ device,D3D11_FILL_SOLID, playerColor, 0.5f,0.5f,0.5f };
+	CMesh* playerMesh = new SphereMesh{ device,D3D11_FILL_SOLID, playerColor, 0.25f,10,10 };
 	player->SetMesh(playerMesh);
 	player->SetPosition({ 0.f, 1.25f, 0.f });
 	shader->objList.emplace_back(player);

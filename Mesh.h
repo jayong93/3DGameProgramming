@@ -85,3 +85,13 @@ public:
 	virtual void CreateRasterizerState(ID3D11Device* device);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 };
+
+class SphereMesh : public CMesh
+{
+public:
+	SphereMesh(ID3D11Device* device, D3D11_FILL_MODE type, FXMVECTOR color, float radius, int slice, int stack);
+	virtual ~SphereMesh();
+
+	virtual void CreateRasterizerState(ID3D11Device* device);
+	virtual void Render(ID3D11DeviceContext* deviceContext);
+};

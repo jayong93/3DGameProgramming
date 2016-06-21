@@ -152,8 +152,6 @@ CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, FXMVECTOR colo
 	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
 	pIndices[33] = 7; pIndices[34] = 4; pIndices[35] = 6;
 
-
-
 	bd.ByteWidth = sizeof(UINT) * indexCnt;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	data.pSysMem = pIndices;
@@ -176,6 +174,82 @@ void CCubeMesh::CreateRasterizerState(ID3D11Device * device)
 }
 
 void CCubeMesh::Render(ID3D11DeviceContext * deviceContext)
+{
+	CMesh::Render(deviceContext);
+}
+
+SphereMesh::SphereMesh(ID3D11Device * device, D3D11_FILL_MODE type, FXMVECTOR color, float radius, int slice, int stack) : CMesh{ type }
+{
+	vertexCnt = slice*stack * 3 * 2;
+	strideByte = sizeof(CDiffusedVertex);
+	offset = 0;
+	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	
+	CDiffusedVertex* v = new CDiffusedVertex[vertexCnt];
+
+	float theta_i, theta_ii, phi_j, phi_jj, radius_j, radius_jj, y_j, y_jj;
+	for (int j = 0, k = 0; j < stack; ++j) {
+		phi_j = XM_PI / float(stack) * j;
+		phi_jj = XM_PI / float(stack) * (j + 1);
+
+		radius_j = radius * sinf(phi_j);
+		radius_jj = radius * sinf(phi_jj);
+		y_j = radius*cosf(phi_j);
+		y_jj = radius*cosf(phi_jj);
+
+		for (int i = 0; i < slice; ++i) {
+			theta_i = ((2 * XM_PI) / (float)slice)*i;
+			theta_ii = ((2 * XM_PI) / (float)slice)*(i + 1);
+
+			XMVECTOR pos = XMVectorSet(radius_j * cosf(theta_i), y_j, radius_j * sinf(theta_i), 0.f);
+			v[k++] = CDiffusedVertex{ pos, XMVector3Normalize(pos), color };
+			pos = XMVectorSet(radius_jj * cosf(theta_i), y_jj, radius_jj * sinf(theta_i), 0.f);
+			v[k++] = CDiffusedVertex{ pos, XMVector3Normalize(pos), color };
+			pos = XMVectorSet(radius_j * cosf(theta_ii), y_j, radius_j * sinf(theta_ii), 0.f);
+			v[k++] = CDiffusedVertex{ pos, XMVector3Normalize(pos), color };
+
+			pos = XMVectorSet(radius_jj * cosf(theta_i), y_jj, radius_jj * sinf(theta_i), 0.f);
+			v[k++] = CDiffusedVertex{ pos, XMVector3Normalize(pos), color };
+			pos = XMVectorSet(radius_jj * cosf(theta_ii), y_jj, radius_jj * sinf(theta_ii), 0.f);
+			v[k++] = CDiffusedVertex{ pos, XMVector3Normalize(pos), color };
+			pos = XMVectorSet(radius_j * cosf(theta_ii), y_j, radius_j * sinf(theta_ii), 0.f);
+			v[k++] = CDiffusedVertex{ pos, XMVector3Normalize(pos), color };
+		}
+	}
+
+	DirectX::BoundingBox::CreateFromPoints(aabb, vertexCnt, (DirectX::XMFLOAT3*)v, sizeof(CDiffusedVertex));
+
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = strideByte*vertexCnt;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA data;
+	ZeroMemory(&data, sizeof(data));
+	data.pSysMem = v;
+	device->CreateBuffer(&bd, &data, &vertexBuffer);
+
+	delete[] v;
+
+	CreateRasterizerState(device);
+}
+
+SphereMesh::~SphereMesh()
+{
+}
+
+void SphereMesh::CreateRasterizerState(ID3D11Device * device)
+{
+	D3D11_RASTERIZER_DESC rd;
+	ZeroMemory(&rd, sizeof(rd));
+	rd.CullMode = (drawType == D3D11_FILL_SOLID) ? D3D11_CULL_BACK : D3D11_CULL_NONE;
+	rd.FillMode = drawType;
+	rd.DepthClipEnable = true;
+	device->CreateRasterizerState(&rd, &rasterizserState);
+}
+
+void SphereMesh::Render(ID3D11DeviceContext * deviceContext)
 {
 	CMesh::Render(deviceContext);
 }
