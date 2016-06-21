@@ -28,14 +28,7 @@ void CScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext* deviceConte
 
 void CScene::ReleaseObject()
 {
-	for (auto& s : shaderList)
-	{
-		s->ReleaseObjects();
-		s->Release();
-	}
-	for (auto& o : objectList)
-		o->Release();
-	player->Release();
+	
 }
 
 bool CScene::ProcessInput(const InputData& inputData, float elapsedTime)
@@ -105,6 +98,19 @@ void FirstScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * device
 	floor->SetMesh(mesh);
 	shader->objList.emplace_back(floor);
 	floor->AddRef();
+}
+
+void FirstScene::ReleaseObject()
+{
+	for (auto& s : shaderList)
+	{
+		s->ReleaseObjects();
+		s->Release();
+	}
+	for (auto& o : objectList)
+		o->Release();
+	player->Release();
+	floor->Release();
 }
 
 bool FirstScene::ProcessInput(const InputData & inputData, float elapsedTime)

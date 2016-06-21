@@ -35,6 +35,7 @@ class FirstScene : public CScene
 {
 public:
 	virtual void BuildObject(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+	virtual void ReleaseObject();
 	virtual bool ProcessInput(const InputData& inputData, float elapsedTime);
 
 private:
