@@ -115,7 +115,7 @@ void CGameFramework::BuildObject()
 	CShader::CreateShaderVariables(d3dDevice);
 
 	playerShader = new CShader;
-	D3DXCOLOR cubeColor{ 0.4f,0.4f,1.f,1.f };
+	XMVECTOR cubeColor = XMVectorSet(0.4f, 0.4f, 1.f, 1.f);
 	CMesh* mesh = new CCubeMesh{ d3dDevice,D3D11_FILL_SOLID, cubeColor, 0.5f,0.5f,0.5f };
 	playerShader->CreateShader(d3dDevice);
 	playerShader->objList.emplace_back(player);
@@ -135,7 +135,7 @@ void CGameFramework::BuildObject()
 
 	if (scene) scene->BuildObject(d3dDevice);
 
-	D3DXCOLOR color{ 1.0f,0.0f,0.0f,1.0f };
+	XMFLOAT4A color{ 1.0f,0.0f,0.0f,1.0f };
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DYNAMIC;

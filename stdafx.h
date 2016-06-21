@@ -27,6 +27,13 @@
 #include <vector>
 #include <stdio.h>
 #include <time.h>
+#include <DirectXMath.h>
+#include <DirectXPackedVector.h>
+#include <DirectXColors.h>
+#include <DirectXCollision.h>
+
+using namespace DirectX;
+using namespace DirectX::PackedVector;
 
 const int FRAME_BUFFER_WIDTH{ 640 };
 const int FRAME_BUFFER_HEIGHT{ 480 };

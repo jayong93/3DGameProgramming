@@ -5,7 +5,7 @@
 
 struct VS_CB_WORLD_MATRIX
 {
-	D3DXMATRIX mtxWorld;
+	XMFLOAT4X4A mtxWorld;
 };
 
 class CShader
@@ -26,7 +26,7 @@ public:
 	virtual void CreateShader(ID3D11Device* device);
 	static void CreateShaderVariables(ID3D11Device* device);
 	static void ReleaseShaderVariables();
-	static void UpdateShaderVariable(ID3D11DeviceContext* deviceContext, D3DXMATRIX* mWorld);
+	static void UpdateShaderVariable(ID3D11DeviceContext* deviceContext, FXMMATRIX mWorld);
 
 	virtual void BuildObjects(ID3D11Device* device) {}
 	virtual void ReleaseObjects();

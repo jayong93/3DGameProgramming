@@ -53,9 +53,9 @@ CTriangleMesh::CTriangleMesh(ID3D11Device * device, D3D11_FILL_MODE type) : CMes
 	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CDiffusedVertex v[3];
-	v[0] = CDiffusedVertex(D3DXVECTOR3(0.0f, 0.5f, 0.0f), D3DXCOLOR{ 1.0f,0.0f,0.0f,1.0f });
-	v[1] = CDiffusedVertex(D3DXVECTOR3(0.5f, -0.5f, 0.0f), D3DXCOLOR{ 0.0f,1.0f,0.0f,1.0f });
-	v[2] = CDiffusedVertex(D3DXVECTOR3(-0.5f, -0.5f, 0.0f), D3DXCOLOR{ 0.0f,0.0f,1.0f,1.0f });
+	v[0] = CDiffusedVertex(XMVectorSet(0.0f, 0.5f, 0.0f, 0.f), XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f));
+	v[1] = CDiffusedVertex(XMVectorSet(0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+	v[2] = CDiffusedVertex(XMVectorSet(-0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f));
 
 	D3D11_BUFFER_DESC bDesc;
 	ZeroMemory(&bDesc, sizeof(D3D11_BUFFER_DESC));
@@ -89,7 +89,7 @@ void CTriangleMesh::CreateRasterizerState(ID3D11Device * device)
 	device->CreateRasterizerState(&rd, &rasterizserState);
 }
 
-CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, D3DXCOLOR color, float width, float height, float depth) : CMesh(type)
+CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, FXMVECTOR color, float width, float height, float depth) : CMesh(type)
 {
 	vertexCnt = 8;
 	strideByte = sizeof(CDiffusedVertex);
@@ -98,18 +98,20 @@ CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, D3DXCOLOR colo
 
 	float x{ width*0.5f }, y{ height*0.5f }, z{ depth*0.5f };
 
-	CDiffusedVertex v[36];
+	CDiffusedVertex v[8];
 	int i = 0;
 
 	//정점 버퍼 데이터는 삼각형 리스트이므로 36개의 정점 데이터를 준비한다.
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, -z), color);
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, -z), color);
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, +y, +z), color);
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, +y, +z), color);
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, -z), color);
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, -z), color);
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(+x, -y, +z), color);
-	v[i++] = CDiffusedVertex(D3DXVECTOR3(-x, -y, +z), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, +y, -z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, +y, -z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, +y, +z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, +y, +z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, -y, -z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, -y, -z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, -y, +z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, -y, +z, 0.f), color);
+
+	DirectX::BoundingBox::CreateFromPoints(aabb, 8, (DirectX::XMFLOAT3*)v, sizeof(CDiffusedVertex));
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));

@@ -27,7 +27,7 @@ void CScene::BuildObject(ID3D11Device * device)
 	shader->CreateShader(device);
 	shaderList.emplace_back(shader);
 
-	D3DXCOLOR cubeColor{ 1.f,0.4f,0.4f,1.f };
+	XMVECTOR cubeColor = XMVectorSet( 1.f,0.4f,0.4f,1.f );
 	CCubeMesh* mesh{ new CCubeMesh{device, D3D11_FILL_SOLID, cubeColor, 0.5f, 0.5f, 0.5f} };
 	for (int i = 0; i < 80; i++)
 	{
@@ -39,7 +39,7 @@ void CScene::BuildObject(ID3D11Device * device)
 		obj->AddRef();
 	}
 
-	D3DXCOLOR floorColor{ 0.5f,0.5f,0.5f,1.f };
+	XMVECTOR floorColor = XMVectorSet( 0.5f,0.5f,0.5f,1.f );
 	mesh = new CCubeMesh{ device, D3D11_FILL_SOLID, floorColor, 100.f,2.f,100.f };
 	CGameObject* floor{ new CGameObject };
 	floor->SetMesh(mesh);

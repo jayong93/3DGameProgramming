@@ -23,10 +23,6 @@ public:
 
 	void Update(float timeElapsed) { if (camera) camera->UpdateViewMatrix(); }
 
-	void Move(float x, float y, float z);
-	void Move(D3DXVECTOR3 const& shift);
-	void Move(DWORD dir, float speed);
-
 protected:
 	CCamera* camera;
 };

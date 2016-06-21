@@ -2,8 +2,8 @@
 
 struct VS_CB_CAMERA
 {
-	D3DXMATRIX mtxView;
-	D3DXMATRIX mtxProjection;
+	XMFLOAT4X4A mtxView;
+	XMFLOAT4X4A mtxProjection;
 };
 
 class CPlayer;
@@ -25,25 +25,25 @@ public:
 	void CreateShaderVariable(ID3D11Device* device);
 	void UpdateShaderVariable(ID3D11DeviceContext* deviceContext);
 
-	void SetPosition(const D3DXVECTOR3& pos) { position = pos; }
-	const D3DXVECTOR3& GetPosition() const { return position; }
+	void SetPosition(FXMVECTOR pos) { XMStoreFloat3A(&position, pos); }
+	XMVECTOR GetPosition() const { return XMLoadFloat3A(&position); }
 
-	void SetLookAt(const D3DXVECTOR3& look) { lookAt = look; }
-	const D3DXVECTOR3& GetLookAt() const { return lookAt; }
+	void SetLookAt(FXMVECTOR look) { XMStoreFloat3A(&lookAt, look); }
+	XMVECTOR GetLookAt() const { return XMLoadFloat3A(&lookAt); }
 
-	void SetUp(const D3DXVECTOR3& up) { this->up = up; }
-	const D3DXVECTOR3& GetUp() const { return up; }
+	void SetUp(FXMVECTOR up) { XMStoreFloat3A(&this->up, up); }
+	XMVECTOR GetUp() const { return XMLoadFloat3A(&up); }
 
 	virtual void Rotate(float x, float y, float z) {}
 
 protected:
-	D3DXMATRIX mtxView;
-	D3DXMATRIX mtxProjection;
+	XMFLOAT4X4A mtxView;
+	XMFLOAT4X4A mtxProjection;
 
-	D3DXVECTOR3 position{ 0.f,0.f,0.f };
-	D3DXVECTOR3 lookAt{ 0.f,0.f,0.f };
-	D3DXVECTOR3 up{ 0.f,1.f,0.f };
-	D3DXVECTOR3 offset{ 0.f,0.f,0.f };
+	XMFLOAT3A position{ 0.f,0.f,0.f };
+	XMFLOAT3A lookAt{ 0.f,0.f,0.f };
+	XMFLOAT3A up{ 0.f,1.f,0.f };
+	XMFLOAT3A offset{ 0.f,0.f,0.f };
 
 	D3D11_VIEWPORT viewport;
 

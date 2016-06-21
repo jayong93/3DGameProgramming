@@ -82,8 +82,8 @@ void CShader::CreateShader(ID3D11Device * device)
 {
 	D3D11_INPUT_ELEMENT_DESC inLayout[]
 	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	UINT elementCnt = ARRAYSIZE(inLayout);
 	CreateVertexShaderFromCompiledFile(device, TEXT("VS.fxo"), inLayout, elementCnt);
@@ -106,12 +106,12 @@ void CShader::ReleaseShaderVariables()
 	if (cbMtxWorld) cbMtxWorld->Release();
 }
 
-void CShader::UpdateShaderVariable(ID3D11DeviceContext * deviceContext, D3DXMATRIX * mWorld)
+void CShader::UpdateShaderVariable(ID3D11DeviceContext * deviceContext, FXMMATRIX mWorld)
 {
 	D3D11_MAPPED_SUBRESOURCE mapRes;
 	deviceContext->Map(cbMtxWorld, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapRes);
 	VS_CB_WORLD_MATRIX* wMtx = (VS_CB_WORLD_MATRIX*)mapRes.pData;
-	D3DXMatrixTranspose(&wMtx->mtxWorld, mWorld);
+	XMStoreFloat4x4A(&wMtx->mtxWorld, XMMatrixTranspose(mWorld));
 	deviceContext->Unmap(cbMtxWorld, 0);
 
 	deviceContext->VSSetConstantBuffers(VS_SLOT_WORLD_MATRIX, 1, &cbMtxWorld);

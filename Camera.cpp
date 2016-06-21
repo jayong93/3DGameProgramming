@@ -5,8 +5,8 @@
 
 CCamera::CCamera() : player(nullptr), cbCamera{ nullptr }
 {
-	D3DXMatrixIdentity(&mtxView);
-	D3DXMatrixIdentity(&mtxProjection);
+	XMStoreFloat4x4A(&mtxView, XMMatrixIdentity());
+	XMStoreFloat4x4A(&mtxProjection, XMMatrixIdentity());
 }
 
 
@@ -29,12 +29,13 @@ void CCamera::SetViewport(ID3D11DeviceContext * deviceContext, DWORD xStart, DWO
 
 void CCamera::CreateViewMatrix()
 {
-	D3DXMatrixLookAtLH(&mtxView, &position, &lookAt, &up);
+	XMStoreFloat4x4A(&mtxView, XMMatrixLookAtLH(XMLoadFloat3A(&position), XMLoadFloat3A(&lookAt), XMLoadFloat3A(&up)));
 }
 
 void CCamera::CreateProjectionMatrix(float nearDist, float farDist, float aspect, float fov)
 {
-	D3DXMatrixPerspectiveFovLH(&mtxProjection, (float)D3DXToRadian(fov), aspect, nearDist, farDist);
+	XMMATRIX mat = XMMatrixPerspectiveFovLH((float)D3DXToRadian(fov), aspect, nearDist, farDist);
+	XMStoreFloat4x4A(&mtxProjection, mat);
 }
 
 void CCamera::CreateShaderVariable(ID3D11Device * device)
@@ -54,52 +55,54 @@ void CCamera::UpdateShaderVariable(ID3D11DeviceContext * deviceContext)
 
 	deviceContext->Map(cbCamera, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapRes);
 	VS_CB_CAMERA* viewProjection = (VS_CB_CAMERA*)mapRes.pData;
-	D3DXMatrixTranspose(&viewProjection->mtxView, &mtxView);
-	D3DXMatrixTranspose(&viewProjection->mtxProjection, &mtxProjection);
+	XMMATRIX mat = XMLoadFloat4x4A(&mtxView);
+	XMStoreFloat4x4A(&viewProjection->mtxView, XMMatrixTranspose(mat));
+	mat = XMLoadFloat4x4A(&mtxProjection);
+	XMStoreFloat4x4A(&viewProjection->mtxProjection, XMMatrixTranspose(mat));
 	deviceContext->Unmap(cbCamera, 0);
 	deviceContext->VSSetConstantBuffers(VS_SLOT_CAMERA, 1, &cbCamera);
 }
 
 ThirdCam::ThirdCam()
 {
-	offset = D3DXVECTOR3{ 0.f,2.f,-5.f };
-	lookAt = D3DXVECTOR3{ 0.f,-5.f,10.f };
+	offset = XMFLOAT3A{ 0.f,2.f,-5.f };
+	lookAt = XMFLOAT3A{ 0.f,-5.f,10.f };
 }
 
 void ThirdCam::SetPlayer(CPlayer * p)
 {
 	CCamera::SetPlayer(p);
 
-	position = p->GetPosition() + offset;
-	lookAt = p->GetPosition();
+	XMStoreFloat3A(&position, p->GetPosition() + XMLoadFloat3A(&offset));
+	XMStoreFloat3A(&lookAt, p->GetPosition());
 }
 
 void ThirdCam::CreateViewMatrix()
 {
-	D3DXMATRIX rm;
-	D3DXVECTOR3 rotatedOffset;
-	D3DXMatrixRotationX(&rm, D3DXToRadian(xAngle));
-	D3DXVec3TransformCoord(&rotatedOffset, &offset, &rm);
-	D3DXMatrixRotationY(&rm, D3DXToRadian(yAngle));
-	D3DXVec3TransformCoord(&rotatedOffset, &rotatedOffset, &rm);
+	XMMATRIX rm;
+	XMVECTOR rotatedOffset;
+	rm = XMMatrixRotationX(XMConvertToRadians(xAngle));
+	rotatedOffset = XMVector3TransformCoord(XMLoadFloat3A(&offset), rm);
+	rm = XMMatrixRotationY(XMConvertToRadians(yAngle));
+	rotatedOffset = XMVector3TransformCoord(rotatedOffset, rm);
 
-	position = player->GetPosition() + rotatedOffset;
-	lookAt = player->GetPosition();
-	D3DXMatrixLookAtLH(&mtxView, &position, &lookAt, &up);
+	XMStoreFloat3A(&position, player->GetPosition() + rotatedOffset);
+	XMStoreFloat3A(&lookAt, player->GetPosition());
+	XMStoreFloat4x4A(&mtxView, XMMatrixLookAtLH(XMLoadFloat3A(&position), XMLoadFloat3A(&lookAt), XMLoadFloat3A(&up)));
 }
 
 void ThirdCam::UpdateViewMatrix()
 {
-	D3DXMATRIX rm;
-	D3DXVECTOR3 rotatedOffset;
-	D3DXMatrixRotationX(&rm, D3DXToRadian(xAngle));
-	D3DXVec3TransformCoord(&rotatedOffset, &offset, &rm);
-	D3DXMatrixRotationY(&rm, D3DXToRadian(yAngle));
-	D3DXVec3TransformCoord(&rotatedOffset, &rotatedOffset, &rm);
+	XMMATRIX rm;
+	XMVECTOR rotatedOffset;
+	rm = XMMatrixRotationX(XMConvertToRadians(xAngle));
+	rotatedOffset = XMVector3TransformCoord(XMLoadFloat3A(&offset), rm);
+	rm = XMMatrixRotationY(XMConvertToRadians(yAngle));
+	rotatedOffset = XMVector3TransformCoord(rotatedOffset, rm);
 
-	position = player->GetPosition() + rotatedOffset;
-	lookAt = player->GetPosition();
-	D3DXMatrixLookAtLH(&mtxView, &position, &lookAt, &up);
+	XMStoreFloat3A(&position, player->GetPosition() + rotatedOffset);
+	XMStoreFloat3A(&lookAt, player->GetPosition());
+	XMStoreFloat4x4A(&mtxView, XMMatrixLookAtLH(XMLoadFloat3A(&position), XMLoadFloat3A(&lookAt), XMLoadFloat3A(&up)));
 }
 
 void ThirdCam::Rotate(float x, float y, float z)
