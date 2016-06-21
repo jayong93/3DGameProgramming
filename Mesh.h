@@ -16,10 +16,12 @@ class CDiffusedVertex
 {
 public:
 	CDiffusedVertex(float x, float y, float z, XMFLOAT4A color) : position{ XMFLOAT3A{x,y,z} }, diffuse{ color } {}
-	CDiffusedVertex(FXMVECTOR pos, FXMVECTOR color)
+	CDiffusedVertex(FXMVECTOR pos, FXMVECTOR normal, FXMVECTOR color)
 	{
 		XMStoreFloat3A(&position, pos);
 		XMStoreFloat4A(&diffuse, color);
+		XMVECTOR n = XMVector3Normalize(normal);
+		XMStoreFloat3A(&this->normal, n);
 	}
 	CDiffusedVertex() : position{ 0,0,0 }, diffuse{ 0,0,0,0 } {}
 	~CDiffusedVertex() {}
@@ -27,6 +29,7 @@ public:
 private:
 	XMFLOAT3A position;
 	XMFLOAT4A diffuse;
+	XMFLOAT3A normal;
 };
 
 class CMesh

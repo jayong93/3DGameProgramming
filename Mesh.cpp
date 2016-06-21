@@ -53,9 +53,9 @@ CTriangleMesh::CTriangleMesh(ID3D11Device * device, D3D11_FILL_MODE type) : CMes
 	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CDiffusedVertex v[3];
-	v[0] = CDiffusedVertex(XMVectorSet(0.0f, 0.5f, 0.0f, 0.f), XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f));
-	v[1] = CDiffusedVertex(XMVectorSet(0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
-	v[2] = CDiffusedVertex(XMVectorSet(-0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f));
+	v[0] = CDiffusedVertex(XMVectorSet(0.0f, 0.5f, 0.0f, 0.f), XMVectorSet(0.0f, 0.5f, 0.0f, 0.f), XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f));
+	v[1] = CDiffusedVertex(XMVectorSet(0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+	v[2] = CDiffusedVertex(XMVectorSet(-0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(-0.5f, -0.5f, 0.0f, 0.f), XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f));
 
 	D3D11_BUFFER_DESC bDesc;
 	ZeroMemory(&bDesc, sizeof(D3D11_BUFFER_DESC));
@@ -102,14 +102,14 @@ CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, FXMVECTOR colo
 	int i = 0;
 
 	//정점 버퍼 데이터는 삼각형 리스트이므로 36개의 정점 데이터를 준비한다.
-	v[i++] = CDiffusedVertex(XMVectorSet(-x, +y, -z, 0.f), color);
-	v[i++] = CDiffusedVertex(XMVectorSet(+x, +y, -z, 0.f), color);
-	v[i++] = CDiffusedVertex(XMVectorSet(+x, +y, +z, 0.f), color);
-	v[i++] = CDiffusedVertex(XMVectorSet(-x, +y, +z, 0.f), color);
-	v[i++] = CDiffusedVertex(XMVectorSet(-x, -y, -z, 0.f), color);
-	v[i++] = CDiffusedVertex(XMVectorSet(+x, -y, -z, 0.f), color);
-	v[i++] = CDiffusedVertex(XMVectorSet(+x, -y, +z, 0.f), color);
-	v[i++] = CDiffusedVertex(XMVectorSet(-x, -y, +z, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, +y, -z, 0.f), XMVectorSet(-1.f, +1.f, -1.f, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, +y, -z, 0.f), XMVectorSet(+1.f, +1.f, -1.f, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, +y, +z, 0.f), XMVectorSet(+1.f, +1.f, +1.f, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, +y, +z, 0.f), XMVectorSet(-1.f, +1.f, +1.f, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, -y, -z, 0.f), XMVectorSet(-1.f, -1.f, -1.f, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, -y, -z, 0.f), XMVectorSet(+1.f, -1.f, -1.f, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(+x, -y, +z, 0.f), XMVectorSet(+1.f, -1.f, +1.f, 0.f), color);
+	v[i++] = CDiffusedVertex(XMVectorSet(-x, -y, +z, 0.f), XMVectorSet(-1.f, -1.f, +1.f, 0.f), color);
 
 	DirectX::BoundingBox::CreateFromPoints(aabb, 8, (DirectX::XMFLOAT3*)v, sizeof(CDiffusedVertex));
 
@@ -151,6 +151,8 @@ CCubeMesh::CCubeMesh(ID3D11Device * device, D3D11_FILL_MODE type, FXMVECTOR colo
 	pIndices[30] = 6; pIndices[31] = 4; pIndices[32] = 5;
 	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
 	pIndices[33] = 7; pIndices[34] = 4; pIndices[35] = 6;
+
+
 
 	bd.ByteWidth = sizeof(UINT) * indexCnt;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
