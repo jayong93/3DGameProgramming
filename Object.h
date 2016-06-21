@@ -69,6 +69,17 @@ protected:
 	float speed{ 3.f }, angleSpeed;
 };
 
+class RollingObject : public CGameObject
+{
+public:
+	RollingObject(ID3D11Device* device, FXMVECTOR color, float radius);
+
+	virtual void Animate(float deltaTime);
+
+private:
+	float speed;
+};
+
 class HeightMap
 {
 public:

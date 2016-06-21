@@ -200,19 +200,32 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 	cam->CreateShaderVariable(device);
 	cam->SetViewport(deviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
-	cam->CreateProjectionMatrix(1.0, 500.0f, FRAME_BUFFER_WIDTH / (float)FRAME_BUFFER_HEIGHT, 90.0f);
+	cam->CreateProjectionMatrix(1.0, 1000.0f, FRAME_BUFFER_WIDTH / (float)FRAME_BUFFER_HEIGHT, 90.0f);
 	cam->SetPlayer(player);
 	cam->CreateViewMatrix();
 
 	player->SetCamera(cam);
 	player->CreateShaderVariables(device);
 
-	XMVECTOR scale = XMVectorSet(2.0f, 0.7f, 2.0f, 1.0f);
-	XMVECTOR color = XMVectorSet(0.7f, 0.7f, 1.0f, 0.0f);
+	// 瘤屈 积己
+	XMVECTOR scale = XMVectorSet(2.0f, 0.5f, 2.0f, 1.0f);
+	XMVECTOR color = XMVectorSet(0.7f, 0.7f, 0.7f, 0.0f);
 	terrain = new HeightMapTerrain(device, TEXT("HeightMap.raw"), 257, 257, 17, 17,
 		scale, color);
 	shader->objList.emplace_back(terrain);
 	terrain->AddRef();
+
+	// 备 积己
+	RollingObject* obj;
+	XMVECTOR sphereColor = XMVectorSet(1.f, 0.7f, 0.7f, 1.f);
+	for (int i = 0; i < 100; ++i)
+	{
+		obj = new RollingObject{ device, sphereColor, 5.f };
+		int x = RandomRangeFloat(5.f, 510.f), z = RandomRangeFloat(5.f, 510.f);
+		int y = terrain->GetHeight(x, z) + 5.f;
+		obj->SetPosition(XMVectorSet(x, y, z, 0));
+		shader->objList.emplace_back(obj);
+	}
 }
 
 void SecondScene::ReleaseObject()
@@ -224,5 +237,40 @@ void SecondScene::ReleaseObject()
 
 bool SecondScene::ProcessInput(const InputData & inputData, float elapsedTime)
 {
-	return false;
+	DWORD direction{ 0 };
+	if (inputData.keyBuffer['W'] & 0xf0) direction |= FORWARD;
+	if (inputData.keyBuffer['S'] & 0xf0) direction |= BACKWARD;
+	if (inputData.keyBuffer['A'] & 0xf0) direction |= LEFT;
+	if (inputData.keyBuffer['D'] & 0xf0) direction |= RIGHT;
+
+	float cx = 0.f, cy = 0.f;
+	if (inputData.keyBuffer[VK_RBUTTON])
+	{
+		cx = (float)(inputData.cursorPos.x - inputData.oldCursorPos.x) / 3.f;
+		cy = (float)(inputData.cursorPos.y - inputData.oldCursorPos.y) / 3.f;
+	}
+
+	if (direction != 0 || cx != 0.f || cy != 0.f)
+	{
+		if (cx || cy)
+		{
+			if (inputData.keyBuffer[VK_RBUTTON] & 0xf0)
+				player->GetCamera()->Rotate(cy, cx, 0.f);
+		}
+
+		if (direction)
+		{
+			player->Move(direction, 50.f*elapsedTime);
+		}
+		player->Update(elapsedTime);
+	}
+	return true;
+}
+
+void SecondScene::AnimateObject(float deltaTime)
+{
+	for (auto& s : shaderList)
+	{
+		s->AnimateObjects(deltaTime);
+	}
 }

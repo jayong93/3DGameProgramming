@@ -261,6 +261,8 @@ XMVECTOR HeightMap::GetHeightMapNormal(int x, int z)
 
 HeightMapTerrain::HeightMapTerrain(ID3D11Device * device, LPCTSTR fileName, int width, int length, int blockWidth, int blockLength, FXMVECTOR scale, FXMVECTOR color) : CGameObject(0), width{ width }, length{ length }
 {
+	XMStoreFloat3A(&this->scale, scale);
+
 	int xPerBlock = blockWidth - 1;
 	int zPerBlock = blockLength - 1;
 
@@ -299,4 +301,14 @@ float HeightMapTerrain::GetPeakHeight()
 		if (r < corner[i].y) r = corner[i].y;
 	}
 	return r;
+}
+
+RollingObject::RollingObject(ID3D11Device * device, FXMVECTOR color, float radius) : speed{ 20.f }
+{
+	SphereMesh* mesh{ new SphereMesh{device, D3D11_FILL_SOLID, color, radius, 20, 20} };
+	SetMesh(mesh);
+}
+
+void RollingObject::Animate(float deltaTime)
+{
 }

@@ -244,7 +244,7 @@ void SphereMesh::CreateRasterizerState(ID3D11Device * device)
 {
 	D3D11_RASTERIZER_DESC rd;
 	ZeroMemory(&rd, sizeof(rd));
-	rd.CullMode = (drawType == D3D11_FILL_SOLID) ? D3D11_CULL_BACK : D3D11_CULL_NONE;
+	rd.CullMode = D3D11_CULL_NONE;
 	rd.FillMode = drawType;
 	rd.DepthClipEnable = true;
 	device->CreateRasterizerState(&rd, &rasterizserState);
