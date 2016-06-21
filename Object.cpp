@@ -121,30 +121,35 @@ void ChasingObject::Animate(float deltaTime)
 {
 	if (target)
 	{
+		XMFLOAT4X4A rm;
+		XMStoreFloat4x4A(&rm, this->GetWorldMatrix());
+		rm._41 = rm._42 = rm._43 = 0.f;
+		XMVECTOR forward = XMVectorSet(0.f, 0.f, 1.f, 0.f);
+		XMVECTOR look = XMVector3TransformCoord(forward, XMLoadFloat4x4A(&rm));
+
 		XMVECTOR targetPos = target->GetPosition();
 		XMVECTOR myPos = this->GetPosition();
 		XMVECTOR targetDir = targetPos - myPos;
 		targetDir = XMVector3Normalize(targetDir);
-		XMVECTOR forward = XMVectorSet(0.f, 0.f, 1.f, 0.f);
-		XMVECTOR axis = XMVector3Cross(targetDir, forward);
+		XMVECTOR axis = XMVector3Cross(targetDir, look);
 
-		float dotResult = XMVectorGetX(XMVector3Dot(targetDir, forward));
-		dotResult = MinMax(0.f, dotResult, 1.f);
+		float dotResult = XMVectorGetX(XMVector3Dot(targetDir, look));
+		dotResult = MinMax(-1.f, dotResult, 1.f);
 		float angle = XMConvertToDegrees(XMScalarACos(dotResult));
 
 		if (angle >= 0.01)
 		{
 			if (angle > angleSpeed*deltaTime)
 				angle = angleSpeed*deltaTime;
-			if (XMVectorGetY(axis) < 0)
+			if (XMVectorGetY(axis) > 0)
 				angle = -angle;
 			angle = XMConvertToRadians(angle);
 
 			XMMATRIX rm = XMMatrixRotationY(angle);
 			this->SetWorldMatrix(rm * this->GetWorldMatrix());
+			look = XMVector3TransformCoord(look, rm);
 		}
 
-		XMVECTOR look = XMVector3TransformCoord(forward, this->GetWorldMatrix());
 		look *= speed*deltaTime;
 		this->Move(look);
 	}

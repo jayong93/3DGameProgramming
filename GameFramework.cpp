@@ -133,7 +133,7 @@ void CGameFramework::BuildObject()
 	player->SetCamera(cam);
 	player->CreateShaderVariables(d3dDevice);
 
-	if (scene) scene->BuildObject(d3dDevice);
+	if (scene) scene->BuildObject(d3dDevice, player);
 
 	XMFLOAT4A color{ 1.0f,0.0f,0.0f,1.0f };
 	D3D11_BUFFER_DESC bd;

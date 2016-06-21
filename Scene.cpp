@@ -21,7 +21,7 @@ bool CScene::OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	return false;
 }
 
-void CScene::BuildObject(ID3D11Device * device)
+void CScene::BuildObject(ID3D11Device * device, CPlayer* player)
 {
 	CShader* shader{ new CShader };
 	shader->CreateShader(device);
@@ -31,7 +31,7 @@ void CScene::BuildObject(ID3D11Device * device)
 	CCubeMesh* mesh{ new CCubeMesh{device, D3D11_FILL_SOLID, cubeColor, 0.5f, 0.5f, 0.5f} };
 	for (int i = 0; i < 80; i++)
 	{
-		CRotatingObject* obj{ new CRotatingObject };
+		ChasingObject* obj{ new ChasingObject{player} };
 		obj->SetMesh(mesh);
 		obj->SetPosition({ RandomRangeFloat(-49.f,49.f),1.25f,RandomRangeFloat(-49.f,49.f) });
 		shader->objList.emplace_back(obj);

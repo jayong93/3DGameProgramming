@@ -10,7 +10,7 @@ public:
 	bool OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	bool OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
-	void BuildObject(ID3D11Device* device);
+	void BuildObject(ID3D11Device* device, CPlayer* player = nullptr);
 	void ReleaseObject();
 
 	bool ProcessInput();
