@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 
 
-CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }, player{ nullptr }
+CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }
 {
 	srand(time(nullptr));
 	_tcscpy_s(captionBuffer, TEXT("DirectX Project "));
@@ -109,31 +109,9 @@ bool CGameFramework::CreateDirect3DDisplay()
 void CGameFramework::BuildObject()
 {
 	scene = new CScene;
-
-	player = new CPlayer;
-
 	CShader::CreateShaderVariables(d3dDevice);
 
-	playerShader = new CShader;
-	XMVECTOR cubeColor = XMVectorSet(0.4f, 0.4f, 1.f, 1.f);
-	CMesh* mesh = new CCubeMesh{ d3dDevice,D3D11_FILL_SOLID, cubeColor, 0.5f,0.5f,0.5f };
-	playerShader->CreateShader(d3dDevice);
-	playerShader->objList.emplace_back(player);
-	player->SetMesh(mesh);
-	player->SetPosition({ 0.f, 1.25f, 0.f });
-
-	CCamera* cam = new ThirdCam;
-	cam->CreateShaderVariable(d3dDevice);
-	cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
-
-	cam->CreateProjectionMatrix(1.0, 500.0f, clientWidth / (float)clientHeight, 90.0f);
-	cam->SetPlayer(player);
-	cam->CreateViewMatrix();
-
-	player->SetCamera(cam);
-	player->CreateShaderVariables(d3dDevice);
-
-	if (scene) scene->BuildObject(d3dDevice, player);
+	if (scene) scene->BuildObject(d3dDevice, d3dDeviceContext);
 
 	XMFLOAT4A color{ 1.0f,0.0f,0.0f,1.0f };
 	D3D11_BUFFER_DESC bd;
@@ -157,53 +135,21 @@ void CGameFramework::ReleaseObject()
 		delete scene;
 	}
 
-	if (player) delete player;
 	if (cbColor) cbColor->Release();
 }
 
 void CGameFramework::ProcessInput()
 {
-	bool processedByScene{ false };
-	if (scene) processedByScene = scene->ProcessInput();
-	if (!processedByScene)
+	GetKeyboardState(input.keyBuffer);
+	GetCursorPos(&input.cursorPos);
+	if (GetCapture() == hWnd)
 	{
-		static UCHAR keyBuffer[256];
-		DWORD direction{ 0 };
-		if (GetKeyboardState(keyBuffer))
-		{
-			if (keyBuffer['W'] & 0xf0) direction |= FORWARD;
-			if (keyBuffer['S'] & 0xf0) direction |= BACKWARD;
-			if (keyBuffer['A'] & 0xf0) direction |= LEFT;
-			if (keyBuffer['D'] & 0xf0) direction |= RIGHT;
-		}
-
-		float cx = 0.f, cy = 0.f;
-		POINT cursorPos;
-
-		if (GetCapture() == hWnd)
-		{
-			SetCursor(nullptr);
-
-			GetCursorPos(&cursorPos);
-
-			cx = (float)(cursorPos.x - oldCursorPos.x) / 3.f;
-			cy = (float)(cursorPos.y - oldCursorPos.y) / 3.f;
-			SetCursorPos(oldCursorPos.x, oldCursorPos.y);
-		}
-
-		if (direction != 0 || cx != 0.f || cy != 0.f)
-		{
-			if (cx || cy)
-			{
-				if (keyBuffer[VK_RBUTTON] & 0xf0)
-					player->GetCamera()->Rotate(cy, cx, 0.f);
-			}
-
-			if (direction) player->Move(direction, 5.f*timer.GetTimeElapsed());
-		}
+		SetCursor(nullptr);
+		SetCursorPos(input.oldCursorPos.x, input.oldCursorPos.y);
 	}
-
-	player->Update(timer.GetTimeElapsed());
+	else
+		input.oldCursorPos = input.cursorPos;
+	if (scene) scene->ProcessInput(input, timer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObject()
@@ -223,10 +169,7 @@ void CGameFramework::FrameAdvance()
 	if (depthStencilView)
 		d3dDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	if (player) player->UpdateShaderVariables(d3dDeviceContext);
-	CCamera* cam = player ? player->GetCamera() : nullptr;
-	if (scene)scene->Render(d3dDeviceContext, cam);
-	if (playerShader) playerShader->Render(d3dDeviceContext);
+	if (scene)scene->Render(d3dDeviceContext, nullptr);
 
 	dxgiSwapChain->Present(1, 0);
 
@@ -242,7 +185,8 @@ void CGameFramework::OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARA
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 		SetCapture(hWnd);
-		GetCursorPos(&oldCursorPos);
+		GetCursorPos(&input.cursorPos);
+		input.oldCursorPos = input.cursorPos;
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
@@ -299,7 +243,7 @@ LRESULT CGameFramework::OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LP
 		dxgiSwapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
 		CreateRenderTargetView();
-		CCamera* cam = player->GetCamera();
+		CCamera* cam = scene->GetPlayer()->GetCamera();
 		if (cam) cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
 		break;
 	}

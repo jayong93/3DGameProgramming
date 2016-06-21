@@ -53,7 +53,7 @@ public:
 class ChasingObject : public CGameObject
 {
 public:
-	ChasingObject(CGameObject* tg = nullptr) :target{ tg } {};
+	ChasingObject(CGameObject* tg = nullptr) :target{ tg }, angleSpeed{ 180.f } {};
 	virtual ~ChasingObject() {}
 
 	virtual void Animate(float deltaTime);
@@ -62,5 +62,5 @@ public:
 
 protected:
 	CGameObject* target;
-	float speed{ 3.f }, angleSpeed{ 60.f };
+	float speed{ 3.f }, angleSpeed;
 };
