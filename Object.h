@@ -5,13 +5,14 @@
 class CGameObject
 {
 public:
-	CGameObject();
+	CGameObject(int meshNum = 1);
 	virtual ~CGameObject();
 
 	void AddRef() { ++reference; }
 	void Release() { if (--reference < 0) delete this; }
 
-	virtual void SetMesh(CMesh* m);
+	virtual void SetMesh(CMesh* m, int index = 0);
+	virtual CMesh* GetMesh(int index = 0) { return meshes[index]; }
 	virtual void Animate(float deltaTime);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 
@@ -34,9 +35,12 @@ public:
 	void SetWorldMatrix(FXMMATRIX mat) { XMStoreFloat4x4A(&mtxWorld, mat); }
 
 	XMFLOAT4X4A mtxWorld;
-	CMesh* mesh;
+
+	CMesh** meshes;
+	int meshCount;
 
 private:
+	BoundingBox aabb;
 	int reference;
 };
 
@@ -63,4 +67,57 @@ public:
 protected:
 	CGameObject* target;
 	float speed{ 3.f }, angleSpeed;
+};
+
+class HeightMap
+{
+public:
+	HeightMap(LPCTSTR fileName, int width, int length, FXMVECTOR scale);
+	~HeightMap();
+
+	float GetHeight(float x, float z, bool reverseQuad = false);
+	XMVECTOR GetHeightMapNormal(int x, int z);
+	XMVECTOR GetScale() { return XMLoadFloat3A(&scale); }
+
+	BYTE* GetHeightMapImage() { return imageData; }
+	int GetHeightMapWidth() { return width; }
+	int GetHeightMapLength() { return length; }
+
+private:
+	BYTE* imageData;
+
+	int width;
+	int length;
+
+	XMFLOAT3A scale;
+};
+
+class HeightMapTerrain : public CGameObject
+{
+public:
+	HeightMapTerrain(ID3D11Device* device, LPCTSTR fileName, int width, int length, int blockWidth, int blockLength, FXMVECTOR scale, FXMVECTOR color);
+	virtual ~HeightMapTerrain() { if (heightMap) delete heightMap; }
+
+	float GetHeight(float x, float z, bool reverseQuad = false) { return heightMap->GetHeight(x, z, reverseQuad)*scale.y; }
+
+	int GetHeightMapWidth() { return heightMap->GetHeightMapWidth(); }
+	int GetHeightMapLength() { return heightMap->GetHeightMapLength(); }
+
+	XMVECTOR GetScale() { return XMLoadFloat3A(&scale); }
+
+	float GetWidth() { return width*scale.x; }
+	float GetLength() { return length*scale.z; }
+
+	float GetPeakHeight();
+
+private:
+	HeightMap* heightMap;
+
+	int width;
+	int length;
+
+	XMFLOAT3A scale;
+
+	CMesh** meshes;
+	int meshCount;
 };

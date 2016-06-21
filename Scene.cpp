@@ -181,3 +181,8 @@ bool FirstScene::ProcessInput(const InputData & inputData, float elapsedTime)
 	}
 	return true;
 }
+
+void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * deviceContext)
+{
+
+}

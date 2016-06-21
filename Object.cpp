@@ -3,22 +3,41 @@
 #include "Object.h"
 
 
-CGameObject::CGameObject() : mesh{ nullptr }, reference{ 1 }
+CGameObject::CGameObject(int meshNum) : meshes{ nullptr }, reference{ 1 }, meshCount{ meshNum }
 {
+	if (meshCount > 0) meshes = new CMesh*[meshCount];
+	ZeroMemory(meshes, sizeof(CMesh*)*meshCount);
 	XMStoreFloat4x4A(&mtxWorld, XMMatrixIdentity());
 }
 
 
 CGameObject::~CGameObject()
 {
-	if (mesh) mesh->Release();
+	if (meshes)
+	{
+		for (int i = 0; i < meshCount; i++)
+		{
+			if (meshes[i]) meshes[i]->Release();
+		}
+		delete[] meshes;
+	}
 }
 
-void CGameObject::SetMesh(CMesh * m)
+void CGameObject::SetMesh(CMesh* m, int index)
 {
-	if (mesh) mesh->Release();
-	mesh = m;
-	if (mesh) mesh->AddRef();
+	if (meshes[index]) meshes[index]->Release();
+	meshes[index] = m;
+	if (meshes[index]) meshes[index]->AddRef();
+
+	aabb = BoundingBox{ {0,0,0},{0,0,0} };
+	for (int i = 0; i < meshCount; ++i)
+	{
+		if (meshes[i])
+		{
+			BoundingBox box = meshes[i]->GetAABB();
+			BoundingBox::CreateMerged(aabb, aabb, box);
+		}
+	}
 }
 
 void CGameObject::Animate(float deltaTime)
@@ -28,7 +47,10 @@ void CGameObject::Animate(float deltaTime)
 void CGameObject::Render(ID3D11DeviceContext * deviceContext)
 {
 	CShader::UpdateShaderVariable(deviceContext, XMLoadFloat4x4A(&mtxWorld));
-	if (mesh) mesh->Render(deviceContext);
+	for (int i = 0; i < meshCount; i++)
+	{
+		if (meshes[i]) meshes[i]->Render(deviceContext);
+	}
 }
 
 void CGameObject::Move(float x, float y, float z)
@@ -66,10 +88,9 @@ void CGameObject::Move(DWORD dir, float speed)
 
 bool CGameObject::GetAABB(BoundingBox & aabb) const
 {
-	if (mesh)
+	if (meshes)
 	{
-		auto modelAABB = mesh->GetAABB();
-		modelAABB.Transform(aabb, XMLoadFloat4x4A(&mtxWorld));
+		this->aabb.Transform(aabb, XMLoadFloat4x4A(&mtxWorld));
 		return true;
 	}
 	return false;
@@ -77,11 +98,10 @@ bool CGameObject::GetAABB(BoundingBox & aabb) const
 
 bool CGameObject::GetOOBB(BoundingOrientedBox & oobb) const
 {
-	if (mesh)
+	if (meshes)
 	{
-		BoundingOrientedBox modelOOBB;
-		BoundingOrientedBox::CreateFromBoundingBox(modelOOBB, mesh->GetAABB());
-		modelOOBB.Transform(oobb, XMLoadFloat4x4A(&mtxWorld));
+		BoundingOrientedBox::CreateFromBoundingBox(oobb, aabb);
+		oobb.Transform(oobb, XMLoadFloat4x4A(&mtxWorld));
 		return true;
 	}
 	return false;
@@ -89,11 +109,10 @@ bool CGameObject::GetOOBB(BoundingOrientedBox & oobb) const
 
 bool CGameObject::GetBoundingSphere(BoundingSphere & sphere) const
 {
-	if (mesh)
+	if (meshes)
 	{
-		BoundingSphere modelSphere;
-		BoundingSphere::CreateFromBoundingBox(modelSphere, mesh->GetAABB());
-		modelSphere.Transform(sphere, XMLoadFloat4x4A(&mtxWorld));
+		BoundingSphere::CreateFromBoundingBox(sphere, aabb);
+		sphere.Transform(sphere, XMLoadFloat4x4A(&mtxWorld));
 		return true;
 	}
 	return false;
@@ -155,4 +174,129 @@ void ChasingObject::Animate(float deltaTime)
 		look *= speed*deltaTime;
 		this->Move(look);
 	}
+}
+
+HeightMap::HeightMap(LPCTSTR fileName, int width, int length, FXMVECTOR scale) : width{ width }, length{ length }
+{
+	XMStoreFloat3(&this->scale, scale);
+
+	BYTE* image = new BYTE[width * length];
+
+	HANDLE hFile = ::CreateFile(fileName, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, NULL);
+	DWORD dwBytesRead;
+	::ReadFile(hFile, image, (width* length), &dwBytesRead, NULL);
+	::CloseHandle(hFile);
+
+	imageData = new BYTE[width * length];
+	for (int y = 0; y < length; ++y) {
+		for (int x = 0; x < width; ++x) {
+			imageData[x + ((length - 1 - y) * width)] = image[x + (y*width)];
+		}
+	}
+	if (image) delete[] image;
+}
+
+HeightMap::~HeightMap()
+{
+	if (imageData) delete[] imageData;
+}
+
+float HeightMap::GetHeight(float x, float z, bool reverseQuad)
+{
+	x = x / scale.x;
+	z = z / scale.z;
+
+	if ((x < 0.0f) || (z < 0.0f) || (x >= width) || (z >= length))
+		return 0.f;
+
+	int ix = int(x);
+	int iz = int(z);
+	float xPercent{ x - ix };
+	float zPercent{ z - iz };
+	if (iz & 1) reverseQuad = true;
+
+	float topLeft = imageData[ix + ((iz + 1) * width)];
+	float topRight = imageData[(ix + 1) + ((iz + 1) * width)];
+	float bottomLeft = imageData[ix + iz*width];
+	float bottomRight = imageData[(ix + 1) + iz*width];
+
+	if (reverseQuad) {
+		if (zPercent >= xPercent)
+			bottomRight = bottomLeft + (topRight - topLeft);
+		else
+			topLeft = topRight + (bottomLeft - bottomRight);
+	}
+	else {
+		if (zPercent < (1.0f - xPercent))
+			topRight = topLeft + (bottomRight - bottomLeft);
+		else
+			bottomLeft = topLeft + (bottomRight - topRight);
+	}
+
+	float topHeight = topLeft * (1 - xPercent) + topRight * xPercent;
+	float bottomHeight = bottomLeft * (1 - xPercent) + bottomRight * xPercent;
+	float height = bottomHeight * (1 - zPercent) + topHeight * zPercent;
+	return height;
+}
+
+XMVECTOR HeightMap::GetHeightMapNormal(int x, int z)
+{
+	if ((x < 0.0f) || (z < 0.0f) || (x >= width) || (z >= length))
+		return(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+
+	int index{ x + (z*width) };
+	int xAdd{ (x < (width - 1)) ? 1 : -1 };
+	int zAdd{ (z < (length - 1)) ? width : -(signed)width };
+
+	float y1 = (float)imageData[index] * scale.y;
+	float y2 = (float)imageData[index + xAdd] * scale.y;
+	float y3 = (float)imageData[index + zAdd] * scale.y;
+
+	XMVECTOR edge1 = XMVectorSet(0.0f, y3 - y1, scale.z, 0.0f);
+	XMVECTOR edge2 = XMVectorSet(scale.x, y2 - y1, scale.x, 0.0f);
+	XMVECTOR normal = XMVector3Normalize(XMVector3Cross(edge1, edge2));
+
+	return normal;
+}
+
+HeightMapTerrain::HeightMapTerrain(ID3D11Device * device, LPCTSTR fileName, int width, int length, int blockWidth, int blockLength, FXMVECTOR scale, FXMVECTOR color) : CGameObject(0), width{ width }, length{ length }
+{
+	int xPerBlock = blockWidth - 1;
+	int zPerBlock = blockLength - 1;
+
+	heightMap = new HeightMap{ fileName, width, length, scale };
+
+	int xBlockCount = (width - 1) / xPerBlock;
+	int zBlockCount = (length - 1) / zPerBlock;
+
+	meshCount = xBlockCount*zBlockCount;
+	meshes = new CMesh*[meshCount];
+	ZeroMemory(meshes, sizeof(CMesh*)*meshCount);
+
+	HeightMapGridMesh* gridMesh{ nullptr };
+	for (int z = 0, zStart = 0; z < zBlockCount; ++z) {
+		for (int x = 0, xStart = 0; x < xBlockCount; ++x) {
+			xStart = x * (blockWidth - 1);
+			zStart = z * (blockLength - 1);
+			gridMesh = new HeightMapGridMesh(device, D3D11_FILL_SOLID, xStart, zStart,
+				blockWidth, blockLength, scale, color, heightMap);
+			SetMesh(gridMesh, x + (z *  xBlockCount));
+		}
+	}
+}
+
+float HeightMapTerrain::GetPeakHeight()
+{
+	BoundingBox box;
+	GetAABB(box);
+	XMFLOAT3 corner[BoundingBox::CORNER_COUNT];
+	box.GetCorners(corner);
+
+	float r;
+	r = corner[0].y;
+	for (int i = 1; i < 8; ++i)
+	{
+		if (r < corner[i].y) r = corner[i].y;
+	}
+	return r;
 }

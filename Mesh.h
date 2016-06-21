@@ -95,3 +95,28 @@ public:
 	virtual void CreateRasterizerState(ID3D11Device* device);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 };
+
+class HeightMapGridMesh : public CMesh
+{
+public:
+	HeightMapGridMesh(ID3D11Device* device, D3D11_FILL_MODE type, int xStart, int zStart, int width, int length, FXMVECTOR scale, FXMVECTOR color, void* context = nullptr);
+	virtual ~HeightMapGridMesh();
+
+	XMVECTOR GetScale() { return XMLoadFloat3A(& scale); }
+	int GetWidth() { return width; }
+	int GetLength() { return length; }
+
+	virtual float OnGetHeight(int x, int z, void* context);
+	virtual XMVECTOR OnGetColor(int x, int z, void* context);
+	virtual XMVECTOR OnGetNormal(int x, int z, void* context);
+
+	virtual void CreateRasterizerStaion(ID3D11Device* device);
+	virtual void Render(ID3D11DeviceContext* deviceContext);
+
+protected:
+	int width;
+	int length;
+
+	XMFLOAT3A scale;
+
+};
