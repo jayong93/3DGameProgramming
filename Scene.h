@@ -17,17 +17,26 @@ public:
 	bool OnMouseEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	bool OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
-	void BuildObject(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
-	void ReleaseObject();
+	virtual void BuildObject(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+	virtual void ReleaseObject();
 
-	bool ProcessInput(const InputData& inputData, float elapsedTime);
-	void AnimateObject(float elapsedTime);
-	void Render(ID3D11DeviceContext* deviceContext, CCamera* camera);
+	virtual bool ProcessInput(const InputData& inputData, float elapsedTime);
+	virtual void AnimateObject(float elapsedTime);
+	virtual void Render(ID3D11DeviceContext* deviceContext, CCamera* camera);
 
 	CPlayer* GetPlayer() const { return player; }
-private:
+protected:
 	std::vector<CShader*> shaderList;
 	std::vector<CGameObject*> objectList;
 	CPlayer* player;
 };
 
+class FirstScene : public CScene
+{
+public:
+	virtual void BuildObject(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+	virtual bool ProcessInput(const InputData& inputData, float elapsedTime);
+
+private:
+	CGameObject* floor;
+};

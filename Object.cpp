@@ -47,18 +47,20 @@ void CGameObject::Move(DWORD dir, float speed)
 {
 	if (dir)
 	{
-		XMFLOAT3A shift{ 0,0,0 };
+		XMFLOAT3A v{ 0,0,0 };
 
-		if (dir & FORWARD) shift.z += speed;
-		if (dir & BACKWARD) shift.z -= speed;
+		if (dir & FORWARD) v.z += 1.f;
+		if (dir & BACKWARD) v.z -= 1.f;
 
-		if (dir & RIGHT) shift.x += speed;
-		if (dir & LEFT) shift.x -= speed;
+		if (dir & RIGHT) v.x += 1.f;
+		if (dir & LEFT) v.x -= 1.f;
 
-		if (dir & UP) shift.y += speed;
-		if (dir & DOWN) shift.y -= speed;
+		if (dir & UP) v.y += 1.f;
+		if (dir & DOWN) v.y -= 1.f;
 
-		Move(XMLoadFloat3A(&shift));
+		XMVECTOR shift = XMVector3Normalize(XMLoadFloat3A(&v));
+
+		Move(shift * speed);
 	}
 }
 

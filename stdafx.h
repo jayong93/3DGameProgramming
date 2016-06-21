@@ -25,6 +25,7 @@
 #include <D3DX10math.h>
 #include <chrono>
 #include <vector>
+#include <algorithm>
 #include <stdio.h>
 #include <time.h>
 #include <DirectXMath.h>
