@@ -108,7 +108,7 @@ bool CGameFramework::CreateDirect3DDisplay()
 
 void CGameFramework::BuildObject()
 {
-	scene = new FirstScene;
+	scene = new SecondScene;
 	CShader::CreateShaderVariables(d3dDevice);
 
 	if (scene) scene->BuildObject(d3dDevice, d3dDeviceContext);

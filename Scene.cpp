@@ -28,7 +28,15 @@ void CScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext* deviceConte
 
 void CScene::ReleaseObject()
 {
-
+	for (auto& s : shaderList)
+	{
+		s->ReleaseObjects();
+		s->Release();
+	}
+	for (auto& o : objectList)
+		o->Release();
+	if (player)
+		player->Release();
 }
 
 bool CScene::ProcessInput(const InputData& inputData, float elapsedTime)
@@ -103,14 +111,7 @@ void FirstScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * device
 
 void FirstScene::ReleaseObject()
 {
-	for (auto& s : shaderList)
-	{
-		s->ReleaseObjects();
-		s->Release();
-	}
-	for (auto& o : objectList)
-		o->Release();
-	player->Release();
+	CScene::ReleaseObject();
 	floor->Release();
 }
 
@@ -184,5 +185,44 @@ bool FirstScene::ProcessInput(const InputData & inputData, float elapsedTime)
 
 void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * deviceContext)
 {
+	CShader* shader{ new CShader };
+	shader->CreateShader(device);
+	shaderList.emplace_back(shader);
 
+	// 플레이어 생성
+	player = new CPlayer;
+	player->SetPosition({ 250.f, 300.f, -100.f });
+	shader->objList.emplace_back(player);
+	player->AddRef();
+
+	// 카메라 생성
+	CCamera* cam = new ThirdCam;
+	cam->CreateShaderVariable(device);
+	cam->SetViewport(deviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
+	cam->CreateProjectionMatrix(1.0, 500.0f, FRAME_BUFFER_WIDTH / (float)FRAME_BUFFER_HEIGHT, 90.0f);
+	cam->SetPlayer(player);
+	cam->CreateViewMatrix();
+
+	player->SetCamera(cam);
+	player->CreateShaderVariables(device);
+
+	XMVECTOR scale = XMVectorSet(2.0f, 0.7f, 2.0f, 1.0f);
+	XMVECTOR color = XMVectorSet(0.7f, 0.7f, 1.0f, 0.0f);
+	terrain = new HeightMapTerrain(device, TEXT("HeightMap.raw"), 257, 257, 17, 17,
+		scale, color);
+	shader->objList.emplace_back(terrain);
+	terrain->AddRef();
+}
+
+void SecondScene::ReleaseObject()
+{
+	CScene::ReleaseObject();
+	if (terrain)
+		terrain->Release();
+}
+
+bool SecondScene::ProcessInput(const InputData & inputData, float elapsedTime)
+{
+	return false;
 }

@@ -117,7 +117,4 @@ private:
 	int length;
 
 	XMFLOAT3A scale;
-
-	CMesh** meshes;
-	int meshCount;
 };
