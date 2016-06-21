@@ -307,8 +307,14 @@ RollingObject::RollingObject(ID3D11Device * device, FXMVECTOR color, float radiu
 {
 	SphereMesh* mesh{ new SphereMesh{device, D3D11_FILL_SOLID, color, radius, 20, 20} };
 	SetMesh(mesh);
+
+	XMVECTOR dir = XMVectorSet(RandomRangeFloat(-1.f,1.f), 0, RandomRangeFloat(-1.f, 1.f), 0.f);
+	dir = XMVector3Normalize(dir);
+	XMStoreFloat3A(&direction, dir);
 }
 
 void RollingObject::Animate(float deltaTime)
 {
+	XMVECTOR dir = XMLoadFloat3A(&direction);
+	Move(dir*speed*deltaTime);
 }

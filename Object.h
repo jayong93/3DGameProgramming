@@ -76,8 +76,12 @@ public:
 
 	virtual void Animate(float deltaTime);
 
+	XMVECTOR GetDirection() const { return XMLoadFloat3A(&direction); }
+	void SetDirection(FXMVECTOR dir) { XMStoreFloat3A(&direction, dir); }
+
 private:
 	float speed;
+	XMFLOAT3A direction;
 };
 
 class HeightMap

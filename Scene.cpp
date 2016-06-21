@@ -191,7 +191,7 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 
 	// 플레이어 생성
 	player = new CPlayer;
-	player->SetPosition({ 250.f, 300.f, -100.f });
+	player->SetPosition({ 250.f, 150.f, -100.f });
 	shader->objList.emplace_back(player);
 	player->AddRef();
 
@@ -225,6 +225,8 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 		int y = terrain->GetHeight(x, z) + 5.f;
 		obj->SetPosition(XMVectorSet(x, y, z, 0));
 		shader->objList.emplace_back(obj);
+		objectList.emplace_back(obj);
+		obj->AddRef();
 	}
 }
 
@@ -272,5 +274,35 @@ void SecondScene::AnimateObject(float deltaTime)
 	for (auto& s : shaderList)
 	{
 		s->AnimateObjects(deltaTime);
+	}
+	for (auto& o : objectList)
+	{
+		if (o == terrain) continue;
+		XMFLOAT3A pos;
+		XMStoreFloat3A(&pos, o->GetPosition());
+		pos.y = terrain->GetHeight(pos.x, pos.z) + 5.f;
+		o->SetPosition(XMLoadFloat3A(&pos));
+
+		RollingObject* ro = (RollingObject*)o;
+		if (pos.x <= 5.f)
+		{
+			XMVECTOR dir = ro->GetDirection();
+			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(1.f, 0.f, 0.f, 0.f)));
+		}
+		if (pos.x >= 509.f)
+		{
+			XMVECTOR dir = ro->GetDirection();
+			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(-1.f, 0.f, 0.f, 0.f)));
+		}
+		if (pos.z <= 5.f)
+		{
+			XMVECTOR dir = ro->GetDirection();
+			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(0.f, 0.f, 1.f, 0.f)));
+		}
+		if (pos.z >= 509.f)
+		{
+			XMVECTOR dir = ro->GetDirection();
+			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(0.f, 0.f, -1.f, 0.f)));
+		}
 	}
 }
