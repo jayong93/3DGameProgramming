@@ -136,7 +136,14 @@ bool FirstScene::ProcessInput(const InputData & inputData, float elapsedTime)
 				player->GetCamera()->Rotate(cy, cx, 0.f);
 		}
 
-		if (direction) player->Move(direction, 5.f*elapsedTime);
+		if (direction)
+		{
+			XMFLOAT3A pos;
+			player->Move(direction, 5.f*elapsedTime);
+			XMStoreFloat3A(&pos, player->GetPosition());
+			if (abs(pos.x) > 50 || abs(pos.z) > 50)
+				player->Move(direction, -5.f*elapsedTime);
+		}
 		player->Update(elapsedTime);
 	}
 
