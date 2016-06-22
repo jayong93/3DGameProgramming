@@ -384,6 +384,14 @@ void ThirdScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * device
 	shader->objList.emplace_back(floor);
 	floor->AddRef();
 
+	roof = new CGameObject;
+	XMVECTOR roofColor = XMVectorSet(0.4f, 0.4f, 0.4f, 1.f);
+	CMesh* roofMesh = new CCubeMesh{ device, D3D11_FILL_SOLID, roofColor, 500.f,10.f,500.f };
+	roof->SetMesh(roofMesh);
+	roof->SetPosition(XMVectorSet(250.f, 25.f, 250.f, 0.f));
+	shader->objList.emplace_back(roof);
+	roof->AddRef();
+
 	enermy = new CGameObject;
 	XMVECTOR enermyColor = XMVectorSet(0.7f, 0.2f, 0.2f, 1.f);
 	CMesh* enermyMesh = new CCubeMesh{ device, D3D11_FILL_SOLID, enermyColor, 10.f, 10.f,10.f };
@@ -419,6 +427,15 @@ void ThirdScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * device
 
 void ThirdScene::ReleaseObject()
 {
+	CScene::ReleaseObject();
+	if (enermy)
+		enermy->Release();
+	if (this->floor)
+		this->floor->Release();
+	if (roof)
+		roof->Release();
+	if (bullet)
+		bullet->Release();
 }
 
 bool ThirdScene::ProcessInput(const InputData & inputData, float elapsedTime)

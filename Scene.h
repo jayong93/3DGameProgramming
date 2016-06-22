@@ -68,5 +68,6 @@ public:
 private:
 	CGameObject* enermy;
 	CGameObject* floor;
+	CGameObject* roof;
 	Bullet* bullet;
 };
