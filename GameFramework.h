@@ -43,6 +43,8 @@ public:
 	ID3D11Device* GetDevice() const { return d3dDevice; }
 	ID3D11DeviceContext* GetDeviceContext() const {	return d3dDeviceContext; }
 
+	void SetSceneIndex(int i) { sceneIndex = i; }
+
 private:
 	CGameFramework();
 	~CGameFramework();
@@ -63,7 +65,8 @@ private:
 
 	CTimer timer;
 	TCHAR captionBuffer[50];
-	CScene* scene;
+	std::vector<CScene*> sceneList;
+	int sceneIndex{ 0 };
 
 	ID3D11Buffer* cbColor;
 

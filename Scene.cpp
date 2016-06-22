@@ -182,6 +182,8 @@ bool FirstScene::ProcessInput(const InputData & inputData, float elapsedTime)
 			else
 				++it;
 		}
+
+		if (objectList.empty()) CGameFramework::Get()->SetSceneIndex(1);
 	}
 	return true;
 }
@@ -290,6 +292,11 @@ bool SecondScene::ProcessInput(const InputData & inputData, float elapsedTime)
 			player->Move(direction, 50.f*elapsedTime);
 		}
 		player->Update(elapsedTime);
+	}
+
+	if (inputData.keyBuffer['X'] & 0xf0)
+	{
+		CGameFramework::Get()->SetSceneIndex(2);
 	}
 	return true;
 }
@@ -588,5 +595,6 @@ void ThirdScene::AnimateObject(float deltaTime)
 
 void ThirdScene::Render(ID3D11DeviceContext * deviceContext, CCamera * camera)
 {
+	player->GetCamera()->SetViewport(deviceContext);
 	CScene::Render(deviceContext, camera);
 }

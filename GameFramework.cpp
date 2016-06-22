@@ -109,10 +109,15 @@ bool CGameFramework::CreateDirect3DDisplay()
 
 void CGameFramework::BuildObject()
 {
-	scene = new ThirdScene;
+	sceneList.emplace_back(new FirstScene);
+	sceneList.emplace_back(new SecondScene);
+	sceneList.emplace_back(new ThirdScene);
 	CShader::CreateShaderVariables(d3dDevice);
 
-	if (scene) scene->BuildObject(d3dDevice, d3dDeviceContext);
+	for (auto& s : sceneList)
+	{
+		s->BuildObject(d3dDevice, d3dDeviceContext);
+	}
 
 	XMFLOAT4A color{ 1.0f,0.0f,0.0f,1.0f };
 	D3D11_BUFFER_DESC bd;
@@ -130,10 +135,10 @@ void CGameFramework::BuildObject()
 
 void CGameFramework::ReleaseObject()
 {
-	if (scene)
+	for(auto& s : sceneList)
 	{
-		scene->ReleaseObject();
-		delete scene;
+		s->ReleaseObject();
+		delete s;
 	}
 
 	if (cbColor) cbColor->Release();
@@ -150,12 +155,12 @@ void CGameFramework::ProcessInput()
 	}
 	else
 		input.oldCursorPos = input.cursorPos;
-	if (scene) scene->ProcessInput(input, timer.GetTimeElapsed());
+	if (sceneIndex < sceneList.size()) sceneList[sceneIndex]->ProcessInput(input, timer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObject()
 {
-	scene->AnimateObject(timer.GetTimeElapsed());
+	if(sceneIndex < sceneList.size()) sceneList[sceneIndex]->AnimateObject(timer.GetTimeElapsed());
 }
 
 void CGameFramework::FrameAdvance()
@@ -170,7 +175,7 @@ void CGameFramework::FrameAdvance()
 	if (depthStencilView)
 		d3dDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	if (scene)scene->Render(d3dDeviceContext, nullptr);
+	if (sceneIndex < sceneList.size()) sceneList[sceneIndex]->Render(d3dDeviceContext, nullptr);
 
 	dxgiSwapChain->Present(1, 0);
 
@@ -244,7 +249,7 @@ LRESULT CGameFramework::OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LP
 		dxgiSwapChain->ResizeBuffers(1, clientWidth, clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
 		CreateRenderTargetView();
-		CCamera* cam = scene->GetPlayer()->GetCamera();
+		CCamera* cam = sceneList[sceneIndex]->GetPlayer()->GetCamera();
 		if (cam) cam->SetViewport(d3dDeviceContext, 0, 0, clientWidth, clientHeight);
 		break;
 	}
