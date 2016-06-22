@@ -17,6 +17,7 @@ public:
 	virtual void SetPlayer(CPlayer* p) { player = p; }
 
 	void SetViewport(ID3D11DeviceContext* deviceContext, DWORD xStart, DWORD yStart, DWORD width, DWORD height, float minZ = 0.0f, float maxZ = 1.0f);
+	void SetViewport(ID3D11DeviceContext* deviceContext);
 
 	virtual void CreateViewMatrix();
 	virtual void UpdateViewMatrix() {}
@@ -66,4 +67,10 @@ public:
 
 protected:
 	float xAngle{ 0.f }, yAngle{ 0.f };
+};
+
+class OrthoCam : public CCamera
+{
+public:
+	OrthoCam(float width, float height);
 };

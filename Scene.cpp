@@ -56,7 +56,7 @@ void CScene::Render(ID3D11DeviceContext * deviceContext, CCamera* camera)
 {
 	player->UpdateShaderVariables(deviceContext);
 	for (auto& s : shaderList)
-		s->Render(deviceContext);
+		s->Render(deviceContext, camera);
 }
 
 void FirstScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * deviceContext)
@@ -68,8 +68,7 @@ void FirstScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * device
 	// 플레이어 생성
 	player = new CPlayer;
 	XMVECTOR playerColor = XMVectorSet(0.4f, 0.4f, 1.f, 1.f);
-	//CMesh* playerMesh = new CCubeMesh{ device,D3D11_FILL_SOLID, playerColor, 0.5f,0.5f,0.5f };
-	CMesh* playerMesh = new SphereMesh{ device,D3D11_FILL_SOLID, playerColor, 0.25f,10,10 };
+	CMesh* playerMesh = new CCubeMesh{ device,D3D11_FILL_SOLID, playerColor, 0.5f,0.5f,0.5f };
 	player->SetMesh(playerMesh);
 	player->SetPosition({ 0.f, 1.25f, 0.f });
 	shader->objList.emplace_back(player);
@@ -189,6 +188,11 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 	shader->CreateShader(device);
 	shaderList.emplace_back(shader);
 
+	// 미니맵 쉐이더
+	CShader* minimapShader = new MinimapShader;
+	minimapShader->CreateShader(device);
+	shaderList.emplace_back(minimapShader);
+
 	// 플레이어 생성
 	player = new CPlayer;
 	player->SetPosition({ 250.f, 150.f, -100.f });
@@ -213,6 +217,8 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 	terrain = new HeightMapTerrain(device, TEXT("HeightMap.raw"), 257, 257, 17, 17,
 		scale, color);
 	shader->objList.emplace_back(terrain);
+	minimapShader->objList.emplace_back(terrain);
+	terrain->AddRef();
 	terrain->AddRef();
 
 	// 구 생성
@@ -225,9 +231,19 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 		int y = terrain->GetHeight(x, z) + 5.f;
 		obj->SetPosition(XMVectorSet(x, y, z, 0));
 		shader->objList.emplace_back(obj);
+		minimapShader->objList.emplace_back(obj);
 		objectList.emplace_back(obj);
 		obj->AddRef();
+		obj->AddRef();
 	}
+
+	// 미니맵을 위한 카메라
+	minimapCam = new OrthoCam{ 1000.f,1000.f};
+	minimapCam->CreateShaderVariable(device);
+	minimapCam->SetViewport(deviceContext, FRAME_BUFFER_WIDTH - 200, FRAME_BUFFER_HEIGHT - 200, 200, 200);
+	minimapCam->SetPosition(XMVectorSet(257.f, 100.f, 257.f, 0.f));
+	minimapCam->SetLookAt(XMVectorSet(257.f, 0.f, 257.f, 0.f));
+	minimapCam->CreateViewMatrix();
 }
 
 void SecondScene::ReleaseObject()
@@ -235,6 +251,8 @@ void SecondScene::ReleaseObject()
 	CScene::ReleaseObject();
 	if (terrain)
 		terrain->Release();
+	if (minimapCam)
+		delete minimapCam;
 }
 
 bool SecondScene::ProcessInput(const InputData & inputData, float elapsedTime)
@@ -257,7 +275,10 @@ bool SecondScene::ProcessInput(const InputData & inputData, float elapsedTime)
 		if (cx || cy)
 		{
 			if (inputData.keyBuffer[VK_RBUTTON] & 0xf0)
+			{
+				player->Rotate(XMVectorSet(0.f, XMConvertToRadians(cx), 0.f, 0.f));
 				player->GetCamera()->Rotate(cy, cx, 0.f);
+			}
 		}
 
 		if (direction)
@@ -280,29 +301,46 @@ void SecondScene::AnimateObject(float deltaTime)
 		if (o == terrain) continue;
 		XMFLOAT3A pos;
 		XMStoreFloat3A(&pos, o->GetPosition());
-		pos.y = terrain->GetHeight(pos.x, pos.z) + 5.f;
-		o->SetPosition(XMLoadFloat3A(&pos));
 
 		RollingObject* ro = (RollingObject*)o;
-		if (pos.x <= 5.f)
+		if (pos.x < 5.f)
 		{
+			pos.x = 5.f;
 			XMVECTOR dir = ro->GetDirection();
 			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(1.f, 0.f, 0.f, 0.f)));
 		}
-		if (pos.x >= 509.f)
+		else if (pos.x > 509.f)
 		{
+			pos.x = 509.f;
 			XMVECTOR dir = ro->GetDirection();
 			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(-1.f, 0.f, 0.f, 0.f)));
 		}
-		if (pos.z <= 5.f)
+		if (pos.z < 5.f)
 		{
+			pos.z = 5.f;
 			XMVECTOR dir = ro->GetDirection();
 			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(0.f, 0.f, 1.f, 0.f)));
 		}
-		if (pos.z >= 509.f)
+		else if (pos.z > 509.f)
 		{
+			pos.z = 509.f;
 			XMVECTOR dir = ro->GetDirection();
 			ro->SetDirection(XMVector3Reflect(dir, XMVectorSet(0.f, 0.f, -1.f, 0.f)));
 		}
+
+		pos.y = terrain->GetHeight(pos.x, pos.z) + 5.f;
+		o->SetPosition(XMLoadFloat3A(&pos));
 	}
+}
+
+void SecondScene::Render(ID3D11DeviceContext * deviceContext, CCamera * camera)
+{
+	player->UpdateShaderVariables(deviceContext);
+	player->GetCamera()->SetViewport(deviceContext);
+	auto s = shaderList.front();
+	s->Render(deviceContext, camera);
+
+	minimapCam->SetViewport(deviceContext);
+	s = shaderList.back();
+	s->Render(deviceContext, minimapCam);
 }

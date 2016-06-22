@@ -27,6 +27,11 @@ void CCamera::SetViewport(ID3D11DeviceContext * deviceContext, DWORD xStart, DWO
 	deviceContext->RSSetViewports(1, &viewport);
 }
 
+void CCamera::SetViewport(ID3D11DeviceContext* deviceContext)
+{
+	deviceContext->RSSetViewports(1, &viewport);
+}
+
 void CCamera::CreateViewMatrix()
 {
 	XMStoreFloat4x4A(&mtxView, XMMatrixLookAtLH(XMLoadFloat3A(&position), XMLoadFloat3A(&lookAt), XMLoadFloat3A(&up)));
@@ -114,4 +119,9 @@ void ThirdCam::Rotate(float x, float y, float z)
 	else if (yAngle < 0) yAngle += 360;
 
 	this->UpdateViewMatrix();
+}
+
+OrthoCam::OrthoCam(float width, float height)
+{
+	XMStoreFloat4x4A(&mtxProjection, XMMatrixOrthographicLH(width, height, 0.01f, 1000.f));
 }

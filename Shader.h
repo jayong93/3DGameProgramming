@@ -45,4 +45,9 @@ protected:
 	static ID3D11Buffer* cbMtxWorld;
 };
 
-
+class MinimapShader : public CShader
+{
+public:
+	virtual void CreateShader(ID3D11Device* device);
+	virtual void Render(ID3D11DeviceContext *deviceContext, CCamera *camera = NULL);
+};

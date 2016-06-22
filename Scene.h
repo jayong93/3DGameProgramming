@@ -49,7 +49,9 @@ public:
 	virtual void ReleaseObject();
 	virtual bool ProcessInput(const InputData& inputData, float elapsedTime);
 	virtual void AnimateObject(float deltaTime);
+	virtual void Render(ID3D11DeviceContext* deviceContext, CCamera* camera);
 
 private:
 	HeightMapTerrain* terrain{ nullptr };
+	OrthoCam* minimapCam{ nullptr };
 };

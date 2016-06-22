@@ -16,9 +16,10 @@ public:
 	virtual void Animate(float deltaTime);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 
-	void Move(float x, float y, float z);
-	void Move(FXMVECTOR shift);
-	void Move(DWORD dir, float speed);
+	virtual void Move(float x, float y, float z);
+	virtual void Move(FXMVECTOR shift);
+	virtual void Move(DWORD dir, float speed);
+	virtual void Rotate(FXMVECTOR pyr);
 
 	XMVECTOR GetPosition() const { return XMVectorSet(mtxWorld._41, mtxWorld._42, mtxWorld._43, 0); }
 	void SetPosition(FXMVECTOR pos)

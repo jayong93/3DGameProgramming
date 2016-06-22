@@ -81,9 +81,20 @@ void CGameObject::Move(DWORD dir, float speed)
 		if (dir & DOWN) v.y -= 1.f;
 
 		XMVECTOR shift = XMVector3Normalize(XMLoadFloat3A(&v));
+		XMMATRIX mat = GetWorldMatrix();
+		mat.r[3] = XMVectorSetW(XMVectorZero(), 1.f);
+
+		shift = XMVector3TransformNormal(shift, mat);
 
 		Move(shift * speed);
 	}
+}
+
+void CGameObject::Rotate(FXMVECTOR pyr)
+{
+	XMMATRIX mat = GetWorldMatrix();
+	XMMATRIX rm = XMMatrixRotationRollPitchYawFromVector(pyr);
+	SetWorldMatrix(rm * mat);
 }
 
 bool CGameObject::GetAABB(BoundingBox & aabb) const
@@ -308,7 +319,7 @@ RollingObject::RollingObject(ID3D11Device * device, FXMVECTOR color, float radiu
 	SphereMesh* mesh{ new SphereMesh{device, D3D11_FILL_SOLID, color, radius, 20, 20} };
 	SetMesh(mesh);
 
-	XMVECTOR dir = XMVectorSet(RandomRangeFloat(-1.f,1.f), 0, RandomRangeFloat(-1.f, 1.f), 0.f);
+	XMVECTOR dir = XMVectorSet(RandomRangeFloat(-1.f, 1.f), 0, RandomRangeFloat(-1.f, 1.f), 0.f);
 	dir = XMVector3Normalize(dir);
 	XMStoreFloat3A(&direction, dir);
 }

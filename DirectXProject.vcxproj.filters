@@ -103,5 +103,7 @@
   <ItemGroup>
     <FxCompile Include="VS.fx" />
     <FxCompile Include="PS.fx" />
+    <FxCompile Include="Minimap_VS.fx" />
+    <FxCompile Include="Minimap_PS.fx" />
   </ItemGroup>
 </Project>
