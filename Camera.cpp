@@ -123,5 +123,7 @@ void ThirdCam::Rotate(float x, float y, float z)
 
 OrthoCam::OrthoCam(float width, float height)
 {
-	XMStoreFloat4x4A(&mtxProjection, XMMatrixOrthographicLH(width, height, 0.01f, 1000.f));
+	XMMATRIX mat = XMMatrixOrthographicLH(width, height, 0.01f, 1000.f);
+	XMStoreFloat4x4A(&mtxProjection, mat);
+	up = XMFLOAT3A(0.f, 0.f, 1.f);
 }

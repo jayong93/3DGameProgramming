@@ -238,7 +238,7 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 	}
 
 	// 미니맵을 위한 카메라
-	minimapCam = new OrthoCam{ 1000.f,1000.f};
+	minimapCam = new OrthoCam{ 514.f,514.f};
 	minimapCam->CreateShaderVariable(device);
 	minimapCam->SetViewport(deviceContext, FRAME_BUFFER_WIDTH - 200, FRAME_BUFFER_HEIGHT - 200, 200, 200);
 	minimapCam->SetPosition(XMVectorSet(257.f, 100.f, 257.f, 0.f));

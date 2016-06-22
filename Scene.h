@@ -55,3 +55,10 @@ private:
 	HeightMapTerrain* terrain{ nullptr };
 	OrthoCam* minimapCam{ nullptr };
 };
+
+class ThirdScene : public CScene
+{
+public:
+
+private:
+};

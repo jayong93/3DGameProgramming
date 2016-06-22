@@ -27,7 +27,6 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.position = mul(input.pos, gmtxWorld);
 	output.position = mul(output.position, gmtxView);
 	output.position = mul(output.position, gmtxProjection);
-	float4 testColor = { 1.0f,0.f,0.f,1.f };
-	output.color = testColor;
+	output.color = input.color;
 	return output;
 }
