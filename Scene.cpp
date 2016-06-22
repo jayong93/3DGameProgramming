@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Scene.h"
+#include "GameFramework.h"
 
 
 CScene::CScene()
@@ -134,7 +135,10 @@ bool FirstScene::ProcessInput(const InputData & inputData, float elapsedTime)
 		if (cx || cy)
 		{
 			if (inputData.keyBuffer[VK_RBUTTON] & 0xf0)
+			{
+				player->Rotate(XMVectorSet(0.f, XMConvertToRadians(cx), 0.f, 0.f));
 				player->GetCamera()->Rotate(cy, cx, 0.f);
+			}
 		}
 
 		if (direction)
@@ -149,7 +153,7 @@ bool FirstScene::ProcessInput(const InputData & inputData, float elapsedTime)
 	}
 
 	// 폭발
-	if (inputData.keyBuffer[VK_SPACE] & 0xf0)
+	if (inputData.keyBuffer[VK_LBUTTON] & 0xf0)
 	{
 		XMFLOAT3 playerPos;
 		XMStoreFloat3(&playerPos, player->GetPosition());
@@ -238,7 +242,7 @@ void SecondScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * devic
 	}
 
 	// 미니맵을 위한 카메라
-	minimapCam = new OrthoCam{ 514.f,514.f};
+	minimapCam = new OrthoCam{ 514.f,514.f };
 	minimapCam->CreateShaderVariable(device);
 	minimapCam->SetViewport(deviceContext, FRAME_BUFFER_WIDTH - 200, FRAME_BUFFER_HEIGHT - 200, 200, 200);
 	minimapCam->SetPosition(XMVectorSet(257.f, 100.f, 257.f, 0.f));
@@ -343,4 +347,229 @@ void SecondScene::Render(ID3D11DeviceContext * deviceContext, CCamera * camera)
 	minimapCam->SetViewport(deviceContext);
 	s = shaderList.back();
 	s->Render(deviceContext, minimapCam);
+}
+
+void ThirdScene::BuildObject(ID3D11Device * device, ID3D11DeviceContext * deviceContext)
+{
+	CShader* shader{ new MinimapShader };
+	shader->CreateShader(device);
+	shaderList.emplace_back(shader);
+
+	// 플레이어 생성
+	player = new CPlayer;
+	XMVECTOR playerColor = XMVectorSet(0.7f, 1.f, 0.7f, 1.f);
+	CMesh* playerMesh = new CCubeMesh{ device, D3D11_FILL_SOLID, playerColor, 2.f,2.f,2.f };
+	player->SetMesh(playerMesh);
+	player->SetPosition({ 0.f, 1.f, 0.f });
+	shader->objList.emplace_back(player);
+	player->AddRef();
+
+	// 카메라 생성
+	CCamera* cam = new ThirdCam;
+	cam->CreateShaderVariable(device);
+	cam->SetViewport(deviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
+	cam->CreateProjectionMatrix(1.0, 1000.0f, FRAME_BUFFER_WIDTH / (float)FRAME_BUFFER_HEIGHT, 90.0f);
+	cam->SetPlayer(player);
+	cam->CreateViewMatrix();
+
+	player->SetCamera(cam);
+	player->CreateShaderVariables(device);
+
+	floor = new CGameObject;
+	XMVECTOR floorColor = XMVectorSet(0.7f, 0.7f, 0.7f, 1.f);
+	CMesh* floorMesh = new CCubeMesh{ device, D3D11_FILL_SOLID, floorColor, 1000.f,10.f,1000.f };
+	floor->SetMesh(floorMesh);
+	floor->SetPosition(XMVectorSet(300.f, -5.f, 300.f, 0.f));
+	shader->objList.emplace_back(floor);
+	floor->AddRef();
+
+	enermy = new CGameObject;
+	XMVECTOR enermyColor = XMVectorSet(0.7f, 0.2f, 0.2f, 1.f);
+	CMesh* enermyMesh = new CCubeMesh{ device, D3D11_FILL_SOLID, enermyColor, 10.f, 10.f,10.f };
+	enermy->SetMesh(enermyMesh);
+	enermy->SetPosition(XMVectorSet(10.f + (10.f * 41), 5.f, 10.f + (10.f * 40), 0.f));
+	shader->objList.emplace_back(enermy);
+	enermy->AddRef();
+
+	// 미로 데이터 읽기
+	XMVECTOR mazeColor = XMVectorSet(1.f, 0.7f, 0.7f, 1.f);
+	CMesh* mazeMesh = new CCubeMesh{ device, D3D11_FILL_SOLID, mazeColor, 10.f, 20.f,10.f };
+
+	std::ifstream ifs{ "maze.txt" };
+	int type;
+	for (int i = 0; i < 42; ++i)
+	{
+		for (int j = 0; j < 42; ++j)
+		{
+			ifs >> type;
+			if (type == 2)
+			{
+				CGameObject* maze = new CGameObject;
+				XMVECTOR pos = XMVectorSet(10.f + (10.f*j), 10.f, 10.f + (10.f*i), 0.f);
+				maze->SetMesh(mazeMesh);
+				maze->SetPosition(pos);
+				shader->objList.emplace_back(maze);
+				objectList.emplace_back(maze);
+				maze->AddRef();
+			}
+		}
+	}
+}
+
+void ThirdScene::ReleaseObject()
+{
+}
+
+bool ThirdScene::ProcessInput(const InputData & inputData, float elapsedTime)
+{
+	DWORD direction{ 0 };
+	if (inputData.keyBuffer['W'] & 0xf0) direction |= FORWARD;
+	if (inputData.keyBuffer['S'] & 0xf0) direction |= BACKWARD;
+	if (inputData.keyBuffer['A'] & 0xf0) direction |= LEFT;
+	if (inputData.keyBuffer['D'] & 0xf0) direction |= RIGHT;
+
+	float cx = 0.f, cy = 0.f;
+	if (inputData.keyBuffer[VK_RBUTTON])
+	{
+		cx = (float)(inputData.cursorPos.x - inputData.oldCursorPos.x) / 3.f;
+		cy = (float)(inputData.cursorPos.y - inputData.oldCursorPos.y) / 3.f;
+	}
+
+	if (direction != 0 || cx != 0.f || cy != 0.f)
+	{
+		if (cx || cy)
+		{
+			if (inputData.keyBuffer[VK_RBUTTON] & 0xf0)
+			{
+				player->Rotate(XMVectorSet(0.f, XMConvertToRadians(cx), 0.f, 0.f));
+				player->GetCamera()->Rotate(cy, cx, 0.f);
+			}
+		}
+
+		if (direction)
+		{
+			player->Move(direction, 50.f*elapsedTime);
+
+			bool moveBack{ false };
+			BoundingOrientedBox playerOOBB;
+			player->GetOOBB(playerOOBB);
+
+			// 적과 충돌
+			if (enermy)
+			{
+				BoundingOrientedBox enermyOOBB;
+				enermy->GetOOBB(enermyOOBB);
+
+				if (playerOOBB.Contains(enermyOOBB) != DISJOINT)
+				{
+					moveBack = true;
+				}
+			}
+
+			// 미로와 충돌
+			if (!moveBack)
+			{
+				for (auto& o : objectList)
+				{
+					BoundingOrientedBox mazeOOBB;
+					o->GetOOBB(mazeOOBB);
+					if (playerOOBB.Contains(mazeOOBB) != DISJOINT)
+					{
+						moveBack = true;
+						break;
+					}
+				}
+			}
+
+			if (moveBack)
+			{
+				player->Move(direction, -50.f*elapsedTime);
+			}
+
+		}
+		player->Update(elapsedTime);
+	}
+
+	if (inputData.keyBuffer[VK_LBUTTON] & 0xf0 && !bullet)
+	{
+		bullet = new Bullet{ CGameFramework::Get()->GetDevice(), player->GetPosition(), XMQuaternionRotationMatrix(player->GetWorldMatrix()) };
+		shaderList.front()->objList.emplace_back(bullet);
+		bullet->AddRef();
+	}
+	return true;
+}
+
+void ThirdScene::AnimateObject(float deltaTime)
+{
+	CScene::AnimateObject(deltaTime);
+
+	if (bullet)
+	{
+		bool isHit{ false };
+
+		XMFLOAT3A bPos;
+		XMStoreFloat3A(&bPos, bullet->GetPosition());
+		if (bPos.x < -10.f || bPos.x > 1000.f || bPos.z < -10.f || bPos.z > 1000.f)
+		{
+			isHit = true;
+		}
+
+		BoundingOrientedBox bulletOOBB;
+		bullet->GetOOBB(bulletOOBB);
+		if (!isHit)
+		{
+			if (enermy)
+			{
+				BoundingOrientedBox enermyOOBB;
+				enermy->GetOOBB(enermyOOBB);
+
+				if (bulletOOBB.Contains(enermyOOBB) != DISJOINT)
+				{
+					isHit = true;
+				}
+
+				auto& shader = shaderList.front();
+				auto p = std::find(shader->objList.begin(), shader->objList.end(), enermy);
+				if (p != shader->objList.end())
+				{
+					shader->objList.erase(p);
+				}
+				delete enermy;
+				enermy = nullptr;
+			}
+		}
+
+		if (!isHit)
+		{
+			for (auto& o : objectList)
+			{
+				BoundingOrientedBox mazeOOBB;
+				o->GetOOBB(mazeOOBB);
+
+				if (bulletOOBB.Contains(mazeOOBB) != DISJOINT)
+				{
+					isHit = true;
+					break;
+				}
+			}
+		}
+
+		if (isHit)
+		{
+			auto& shader = shaderList.front();
+			auto p = std::find(shader->objList.begin(), shader->objList.end(), bullet);
+			if (p != shader->objList.end())
+			{
+				shader->objList.erase(p);
+			}
+			delete bullet;
+			bullet = nullptr;
+		}
+	}
+}
+
+void ThirdScene::Render(ID3D11DeviceContext * deviceContext, CCamera * camera)
+{
+	CScene::Render(deviceContext, camera);
 }

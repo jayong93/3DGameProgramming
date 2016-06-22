@@ -6,8 +6,22 @@
 class CGameFramework
 {
 public:
-	CGameFramework();
-	~CGameFramework();
+	static CGameFramework* Get()
+	{
+		if (self) return self;
+		self = new CGameFramework();
+		return self;
+	}
+
+	static void Release()
+	{
+		if (self)
+		{
+			self->OnDestroy();
+			delete self;
+			self = nullptr;
+		}
+	}
 
 	bool OnCreate(HINSTANCE ghInst, HWND hMainWnd);
 	void OnDestroy();
@@ -26,7 +40,15 @@ public:
 	void OnKeyEvent(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnWndMessage(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
+	ID3D11Device* GetDevice() const { return d3dDevice; }
+	ID3D11DeviceContext* GetDeviceContext() const {	return d3dDeviceContext; }
+
 private:
+	CGameFramework();
+	~CGameFramework();
+
+	static CGameFramework* self;
+
 	HINSTANCE hInst;
 	HWND hWnd;
 

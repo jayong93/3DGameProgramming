@@ -11,7 +11,7 @@
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
-CGameFramework gameFramework;
+CGameFramework* gameFramework;
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -28,6 +28,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// TODO: 여기에 코드를 입력합니다.
+
+	gameFramework = CGameFramework::Get();
 
 	// 전역 문자열을 초기화합니다.
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -58,10 +60,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		else
 		{
-			gameFramework.FrameAdvance();
+			gameFramework->FrameAdvance();
 		}
 	}
-	gameFramework.OnDestroy();
+	gameFramework->Release();
 
 	return (int)msg.wParam;
 }
@@ -112,7 +114,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT, crt.right-crt.left, crt.bottom-crt.top, nullptr, nullptr, hInstance, nullptr);
 
-	gameFramework.OnCreate(hInst, hWnd);
+	gameFramework->OnCreate(hInst, hWnd);
 
 	if (!hWnd)
 	{
@@ -147,7 +149,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		gameFramework.OnWndMessage(hWnd, message, wParam, lParam);
+		gameFramework->OnWndMessage(hWnd, message, wParam, lParam);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);

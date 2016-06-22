@@ -23,15 +23,16 @@
 #include <D3DX11.h>
 #include <D3Dcompiler.h>
 #include <D3DX10math.h>
-#include <chrono>
-#include <vector>
-#include <algorithm>
-#include <stdio.h>
-#include <time.h>
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+#include <chrono>
+#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <stdio.h>
+#include <time.h>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

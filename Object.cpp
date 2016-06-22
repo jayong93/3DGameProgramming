@@ -329,3 +329,20 @@ void RollingObject::Animate(float deltaTime)
 	XMVECTOR dir = XMLoadFloat3A(&direction);
 	Move(dir*speed*deltaTime);
 }
+
+Bullet::Bullet(ID3D11Device * device, FXMVECTOR pos, FXMVECTOR rotate) : speed(300.f)
+{
+	CMesh* mesh = new CCubeMesh{ device, D3D11_FILL_SOLID, XMVectorSet(0.f,0.f,0.f,0.f), 0.5f,0.5f,2.f };
+	SetMesh(mesh);
+
+	SetWorldMatrix(XMMatrixRotationQuaternion(rotate) * GetWorldMatrix());
+	SetPosition(pos);
+}
+
+void Bullet::Animate(float deltaTime)
+{
+	XMVECTOR dir = XMVectorSet(0.f, 0.f, 1.f, 0.f);
+	dir = XMVector3Rotate(dir, XMQuaternionRotationMatrix(GetWorldMatrix()));
+
+	Move(dir * (speed * deltaTime));
+}

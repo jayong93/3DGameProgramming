@@ -85,6 +85,16 @@ private:
 	XMFLOAT3A direction;
 };
 
+class Bullet : public CGameObject
+{
+public:
+	Bullet(ID3D11Device* device, FXMVECTOR pos, FXMVECTOR rotate);
+
+	virtual void Animate(float deltaTime);
+private:
+	float speed;
+};
+
 class HeightMap
 {
 public:

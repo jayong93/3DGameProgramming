@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
+CGameFramework* CGameFramework::self = nullptr;
 
 CGameFramework::CGameFramework() : d3dDevice{ nullptr }, d3dDeviceContext{ nullptr }, dxgiSwapChain{ nullptr }, d3dRenderTargetView{ nullptr }
 {
@@ -108,7 +109,7 @@ bool CGameFramework::CreateDirect3DDisplay()
 
 void CGameFramework::BuildObject()
 {
-	scene = new SecondScene;
+	scene = new ThirdScene;
 	CShader::CreateShaderVariables(d3dDevice);
 
 	if (scene) scene->BuildObject(d3dDevice, d3dDeviceContext);
